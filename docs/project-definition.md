@@ -10,23 +10,16 @@ The four algorithms chosen for this project are:
 
 ## Algorithm Design and Time Complexity
 
-According to Wikipedia ([0]), the aforementioned algorithms should perform
+According to Wikipedia, the aforementioned algorithms should perform
 within the following time bounds, where m is the length of the searched
 substring and n the length of the whole searchable text:
 
-+--------------------+--------------------+-----------------+
-| Algorithm          | Preprocessing time | Matching time   |
-+====================+====================+=================+
-| Rabin-Karp         | Θ(m)               | average Θ(n+m), |
-|                    |                    | worst Θ((n-m)m) |
-+--------------------+--------------------+-----------------+
-| Knuth-morris-Pratt | Θ(m)               | Θ(n)            |
-+--------------------+--------------------+-----------------+
-| Boyer-Moore        | Θ(m+k)             | best Ω(n/m),    |
-|                    |                    | worst O(mn)     |
-+--------------------+--------------------+-----------------+
-| FM-index           | O(n)               | O(m)            |
-+--------------------+--------------------+-----------------+
+| Algorithm          | Preprocessing time | Matching time                   |
+|--------------------|--------------------|---------------------------------|
+| Rabin-Karp         | Θ(m)               | average Θ(n+m), worst Θ((n-m)m) |
+| Knuth-morris-Pratt | Θ(m)               | Θ(n)                            |
+| Boyer-Moore        | Θ(m+k)             | best Ω(n/m), worst O(mn)        |
+| FM-index           | O(n)               | O(m)                            |
 
 ## Data Structures and Space Complexity
 
@@ -35,17 +28,12 @@ Most notable of the data structures is probably the FM-index, which has seen
 wide-spread usage in bioinformatics. According to Wikipedia, these algorithms
 should have the following space-complexities, where k is the size of the alphabet:
 
-+--------------------+------------------+
 | Algorithm          | Space Complexity |
-+====================+==================+
+|--------------------|------------------|
 | Rabin-Karp         | O(1)             |
-+--------------------+------------------+
 | Knuth-morris-Pratt | Θ(m)             |
-+--------------------+------------------+
 | Boyer-Moore        | Θ(k)             |
-+--------------------+------------------+
 | FM-index           | O(n)             |
-+--------------------+------------------+
 
 ## Input and Output
 
