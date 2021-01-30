@@ -9,8 +9,9 @@ import java.nio.charset.StandardCharsets;
 
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
+import tiralabra.algorithms.StringMatcher;
 
-public class RabinKarp {
+public class RabinKarp implements StringMatcher {
   private class SuspectedMatchState {
     int offset = 0;
     byte[] substring;
@@ -23,11 +24,13 @@ public class RabinKarp {
   private HashMap<Object, ArrayList<byte[]>> substringHashes = new HashMap<>();
   private RollingHashFunctionFactory hashFactory;
   private RollingHashFunction hash;
+  private int inputOffset = 0;
   private int windowSize;
   private byte[] buffer;
   private int bufferHead = 0;
   private int bufferSize = 0;
   private ArrayList<SuspectedMatchState> suspectedMatches;
+  private ArrayList<Match> pendingMatches = new ArrayList<>();
 
   RabinKarp(byte[][] substrings, RollingHashFunctionFactory hashFactory) {
     this.hashFactory = hashFactory;
@@ -78,11 +81,12 @@ public class RabinKarp {
     }
   }
 
-  public ArrayList<byte[]> pushByte(byte b) {
+  public void pushByte(byte b) {
     // System.out.println("---");
 
     hash.pushByte(b);
     pushBuffer(b);
+    inputOffset += 1;
 
     for (int i = 0; i < suspectedMatches.size(); i++) {
       suspectedMatches.get(i).offset += 1;
@@ -109,8 +113,6 @@ outer:
       }
     }
 
-    matches = new ArrayList<>(suspectedMatches.size());
-
 outer:
     for (int i = 0; i < suspectedMatches.size(); i++) {
       SuspectedMatchState state = suspectedMatches.get(i);
@@ -131,11 +133,17 @@ outer:
           }
         }
 
-        matches.add(state.substring);
+        pendingMatches.add(new Match(inputOffset - state.substring.length, state.substring));
         // System.out.println("Match: " + new String(state.substring, StandardCharsets.UTF_8));
       }
     }
+  }
 
-    return matches;
+  public Match pollMatch() {
+    if (pendingMatches.size() != 0) {
+      return pendingMatches.remove(0);
+    }
+    
+    return null;
   }
 }

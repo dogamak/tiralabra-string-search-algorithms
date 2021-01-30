@@ -120,4 +120,12 @@ public class ArrayList<T> {
   public int capacity() {
     return array.length;
   }
+
+  public T[] toArray() {
+    Object[] newArray = new Object[size];
+
+    System.arraycopy(array, 0, newArray, 0, size);
+
+    return (T[]) newArray;
+  }
 }
