@@ -29,7 +29,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'tiralabra.App'
+    mainClass = 'tiralabra.app.Main'
 }
 
 tasks.named('test') {
@@ -39,4 +39,10 @@ tasks.named('test') {
 
 test {
   testLogging.showStandardStreams = true
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'tiralabra.app.Main'
+  }
 }
