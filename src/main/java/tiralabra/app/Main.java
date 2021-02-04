@@ -14,7 +14,7 @@ import java.io.IOException;
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 
-import tiralabra.algorithms.StringMatcherBuilder;
+import tiralabra.algorithms.MultiStringMatcherBuilder;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcher.Match;
 import tiralabra.algorithms.RabinKarp.RabinKarpBuilder;
@@ -32,21 +32,21 @@ class InputSource {
 
 public class Main {
   private static interface StringMatcherBuilderFactory {
-    public StringMatcherBuilder create();
+    public MultiStringMatcherBuilder create();
   }
 
   private static String[] FLAGS_TAKE_VALUE = new String[] { "input", "pattern" };
   
   private HashMap<String, StringMatcherBuilderFactory> matcherBuilderFactories = new HashMap<>();
-  private StringMatcherBuilder matcherBuilder = new RabinKarpBuilder();
-  private ArrayList<StringMatcherBuilder> matcherBuilders = new ArrayList<>();
+  private MultiStringMatcherBuilder matcherBuilder = new RabinKarpBuilder();
+  private ArrayList<MultiStringMatcherBuilder> matcherBuilders = new ArrayList<>();
   private ArrayList<InputSource> inputs = new ArrayList<>();
 
   Main () {
     matcherBuilderFactories.insert("rabin-karp", Main::rabinKarpBuilderFactory);
   }
 
-  private static StringMatcherBuilder rabinKarpBuilderFactory() {
+  private static MultiStringMatcherBuilder rabinKarpBuilderFactory() {
     return new RabinKarpBuilder();
   }
 
@@ -152,7 +152,7 @@ public class Main {
   }
 
   private void addPattern(String pattern) {
-    matcherBuilder.addPattern(pattern);
+    matcherBuilder.addPattern(pattern.getBytes());
   }
 
   private void addInput(String input) {

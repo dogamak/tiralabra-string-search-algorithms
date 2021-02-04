@@ -28,8 +28,8 @@ public class RabinKarpTest {
   @Test
   void builderTest() {
     StringMatcher rk = new RabinKarpBuilder()
-      .addPattern("asxa")
-      .addPattern("sxa")
+      .addPattern("asxa".getBytes())
+      .addPattern("sxa".getBytes())
       .build();
 
     rk.pushString("xasxasd");

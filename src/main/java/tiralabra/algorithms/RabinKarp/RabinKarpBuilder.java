@@ -6,10 +6,10 @@
 package tiralabra.algorithms.RabinKarp;
 
 import tiralabra.utils.ArrayList;
-import tiralabra.algorithms.StringMatcherBuilder;
+import tiralabra.algorithms.MultiStringMatcherBuilder;
 import tiralabra.algorithms.StringMatcher;
 
-public class RabinKarpBuilder implements StringMatcherBuilder {
+public class RabinKarpBuilder implements MultiStringMatcherBuilder {
   private RollingHashFunctionFactory hashFactory;
   private ArrayList<byte[]> patterns = new ArrayList<>();
 
@@ -21,7 +21,7 @@ public class RabinKarpBuilder implements StringMatcherBuilder {
     this.hashFactory = hashFactory;
   }
 
-  public StringMatcherBuilder addPattern(byte[] bytes) {
+  public MultiStringMatcherBuilder addPattern(byte[] bytes) {
     patterns.add(bytes);
 
     return this;
