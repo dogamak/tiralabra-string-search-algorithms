@@ -56,8 +56,6 @@ public class RabinKarp implements StringMatcher {
 
       ArrayList<byte[]> hashSubstrings = substringHashes.get(hash.getHash());
 
-      System.out.format("%s -> %d\n", new String(substring, StandardCharsets.UTF_8), hash.getHash());
-
       if (hashSubstrings == null) {
         hashSubstrings = new ArrayList<>();
         substringHashes.insert(hash.getHash(), hashSubstrings);

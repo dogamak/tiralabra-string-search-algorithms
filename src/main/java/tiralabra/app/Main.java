@@ -15,9 +15,11 @@ import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 
 import tiralabra.algorithms.MultiStringMatcherBuilder;
+import tiralabra.algorithms.SingleStringMatcherAdapter;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcher.Match;
 import tiralabra.algorithms.RabinKarp.RabinKarpBuilder;
+import tiralabra.algorithms.KnuthMorrisPratt.KnuthMorrisPrattBuilder;
 
 class InputSource {
   InputStream stream;
@@ -38,16 +40,22 @@ public class Main {
   private static String[] FLAGS_TAKE_VALUE = new String[] { "input", "pattern" };
   
   private HashMap<String, StringMatcherBuilderFactory> matcherBuilderFactories = new HashMap<>();
-  private MultiStringMatcherBuilder matcherBuilder = new RabinKarpBuilder();
+  private StringMatcherBuilderFactory selectedFactory = Main::rabinKarpBuilderFactory;
+  private MultiStringMatcherBuilder matcherBuilder = null;
   private ArrayList<MultiStringMatcherBuilder> matcherBuilders = new ArrayList<>();
   private ArrayList<InputSource> inputs = new ArrayList<>();
 
   Main () {
     matcherBuilderFactories.insert("rabin-karp", Main::rabinKarpBuilderFactory);
+    matcherBuilderFactories.insert("knuth-morris-pratt", Main::knuthMorrisPrattBuilderFactory);
   }
 
   private static MultiStringMatcherBuilder rabinKarpBuilderFactory() {
     return new RabinKarpBuilder();
+  }
+
+  private static MultiStringMatcherBuilder knuthMorrisPrattBuilderFactory() {
+    return new SingleStringMatcherAdapter(new KnuthMorrisPrattBuilder());
   }
 
   private String getFlagLongVariant(String shortFlag) {
@@ -152,6 +160,10 @@ public class Main {
   }
 
   private void addPattern(String pattern) {
+    if (matcherBuilder == null) {
+      matcherBuilder = selectedFactory.create();
+    }
+
     matcherBuilder.addPattern(pattern.getBytes());
   }
 
@@ -170,11 +182,13 @@ public class Main {
   }
 
   private void selectMatcher(StringMatcherBuilderFactory factory) {
-    matcherBuilder = factory.create();
+    selectedFactory = factory;
   }
 
   private void finishMatcher() {
-    matcherBuilders.add(matcherBuilder);
+    if (matcherBuilder != null) {
+      matcherBuilders.add(matcherBuilder);
+    }
   }
 
   private void runMatchers() {

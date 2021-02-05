@@ -64,11 +64,20 @@ public class HashMap<K, V> {
       table[i] = null;
   }
 
+  private int hash(Object key) {
+    int code = key.hashCode();
+
+    if (code < 0)
+      code = -code;
+
+    return code;
+  }
+
   /**
    * Inserts or replaces the value associated with the provided key.
    */
   public void insert(K key, V value) {
-    int i = key.hashCode() % table.length;
+    int i = hash(key) % table.length;
 
     while (table[i] != null && ((Entry) table[i]).key.equals(key)) i++;
 
@@ -104,7 +113,7 @@ public class HashMap<K, V> {
    * If no value is associated with the key, a null is returned.
    */
   public V get(K key) {
-    int i = key.hashCode() % table.length;
+    int i = hash(key) % table.length;
 
     Entry entry;
 

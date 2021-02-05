@@ -6,9 +6,10 @@
 package tiralabra.algorithms.KnuthMorrisPratt;
 
 import tiralabra.utils.ArrayList;
+import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcher.Match;
 
-public class KnuthMorrisPratt {
+public class KnuthMorrisPratt implements StringMatcher {
   byte[] pattern;
   int[] skip_table;
 
@@ -98,7 +99,7 @@ public class KnuthMorrisPratt {
     buffer_size -= 1;
   }
 
-  void pushByte(byte b) {
+  public void pushByte(byte b) {
     int start_input_offset = input_offset;
 
     // Repeat until we need the next byte of input
@@ -120,7 +121,7 @@ public class KnuthMorrisPratt {
     }
   }
 
-  Match pollMatch() {
+  public Match pollMatch() {
     if (matches.size() > 0) {
       return matches.remove(0);
     } else {
