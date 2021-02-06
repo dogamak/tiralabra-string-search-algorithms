@@ -150,12 +150,14 @@ public class Main {
   }
 
   private void printUsage() {
-    System.err.println("Usage: java -jar tiralabra.jar [--rabin-karp] [--pattern=<PATTERN>...]");
-    System.err.println("                               [--input=<FILE>...] [<PATTERN>] [<FILE>...]");
+    System.err.println("Usage: java -jar tiralabra.jar [--rabin-karp] [--knuth-morris-pratt]");
+    System.err.println("                               [--pattern=<PATTERN>...] [--input=<FILE>...]");
+    System.err.println("                               [<PATTERN>] [<FILE>...]");
     System.err.println();
-    System.err.println(" --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
-    System.err.println("    <PATTERN> | Substring to be searched from the input streams");
-    System.err.println("       <FILE> | Path to a file or - for standard input.");
+    System.err.println("         --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
+    System.err.println(" --knuth-morris-pratt | Use the Knuth-Morris-Pratt algotithm for the subsequent patterns");
+    System.err.println("            <PATTERN> | Substring to be searched from the input streams");
+    System.err.println("               <FILE> | Path to a file or - for standard input.");
     System.exit(1);
   }
 
@@ -245,3 +247,5 @@ public class Main {
     new Main().run(args);
   }
 }
+
+
