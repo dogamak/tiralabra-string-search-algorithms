@@ -4,6 +4,7 @@
 
  - [Project Definition](docs/project-definition.md)
  - [Weekly Report 01](docs/weekly-report-01.md)
+ - [Weekly Report 02](docs/weekly-report-02.md)
 
 ## Usage of the Command-Line Utility
 
