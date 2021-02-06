@@ -14,9 +14,10 @@ When executed without any arguments, the utility prints the following usage expl
 Usage: java -jar tiralabra.jar [--rabin-karp] [--pattern=<PATTERN>...]
                                [--input=<FILE>...] [<PATTERN>] [<FILE>...]
 
- --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns (Default)
-    <PATTERN> | Substring to be searched from the input streams
-       <FILE> | Path to a file or - for standard input.
+         --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns (Default)
+ --knuth-morris-pratt | Use the Knuth-Morris-Pratt algotithm for the subsequent patterns
+            <PATTERN> | Substring to be searched from the input streams
+               <FILE> | Path to a file or - for standard input.
 ```
 
 The functionality is very limited as of now, but more functionality is on the way.
@@ -47,4 +48,13 @@ Match at offset 1406 on input stdin: Rabin
 Match at offset 1412 on input stdin: Karp
 Match at offset 1411 on input src/main/java/tiralabra/app/Main.java: Rabin
 Match at offset 1416 on input src/main/java/tiralabra/app/Main.java: Karp
+```
+
+## Executing the benchmarks
+
+All benchmarks defined under the `benchmarks/` directory can be executed using the
+following command after building the project:
+
+```
+java -cp build/libs/tiralabra.jar tiralabra.app.BenchmarkRunner benchmarks/*
 ```
