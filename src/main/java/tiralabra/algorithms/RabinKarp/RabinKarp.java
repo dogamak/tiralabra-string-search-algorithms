@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcher;
+import tiralabra.algorithms.StringMatcherBuilder;
 
 public class RabinKarp implements StringMatcher {
   private class SuspectedMatchState {
@@ -68,6 +69,10 @@ public class RabinKarp implements StringMatcher {
 
     buffer = new byte[bufferCapacity];
     suspectedMatches = new ArrayList<>(substrings.length);
+  }
+
+  public static StringMatcherBuilder getBuilder() {
+    return new RabinKarpBuilder();
   }
 
   private void pushBuffer(byte b) {

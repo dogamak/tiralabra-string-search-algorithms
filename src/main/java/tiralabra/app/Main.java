@@ -14,7 +14,7 @@ import java.io.IOException;
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 
-import tiralabra.algorithms.MultiStringMatcherBuilder;
+import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.algorithms.SingleStringMatcherAdapter;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcher.Match;
@@ -34,15 +34,15 @@ class InputSource {
 
 public class Main {
   private static interface StringMatcherBuilderFactory {
-    public MultiStringMatcherBuilder create();
+    public StringMatcherBuilder create();
   }
 
   private static String[] FLAGS_TAKE_VALUE = new String[] { "input", "pattern" };
   
   private HashMap<String, StringMatcherBuilderFactory> matcherBuilderFactories = new HashMap<>();
   private StringMatcherBuilderFactory selectedFactory = Main::rabinKarpBuilderFactory;
-  private MultiStringMatcherBuilder matcherBuilder = null;
-  private ArrayList<MultiStringMatcherBuilder> matcherBuilders = new ArrayList<>();
+  private StringMatcherBuilder matcherBuilder = null;
+  private ArrayList<StringMatcherBuilder> matcherBuilders = new ArrayList<>();
   private ArrayList<InputSource> inputs = new ArrayList<>();
 
   Main () {
@@ -50,11 +50,11 @@ public class Main {
     matcherBuilderFactories.insert("knuth-morris-pratt", Main::knuthMorrisPrattBuilderFactory);
   }
 
-  private static MultiStringMatcherBuilder rabinKarpBuilderFactory() {
+  private static StringMatcherBuilder rabinKarpBuilderFactory() {
     return new RabinKarpBuilder();
   }
 
-  private static MultiStringMatcherBuilder knuthMorrisPrattBuilderFactory() {
+  private static StringMatcherBuilder knuthMorrisPrattBuilderFactory() {
     return new SingleStringMatcherAdapter(new KnuthMorrisPrattBuilder());
   }
 
@@ -196,7 +196,7 @@ public class Main {
       InputSource input = inputs.get(i);
 
       for (int j = 0; j < matcherBuilders.size(); j++) {
-        StringMatcher matcher = matcherBuilders.get(j).build();
+        StringMatcher matcher = matcherBuilders.get(j).buildMatcher();
         input.matchers.add(matcher);
       }
     }

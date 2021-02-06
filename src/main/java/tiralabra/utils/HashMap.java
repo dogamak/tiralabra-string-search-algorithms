@@ -5,6 +5,9 @@
 
 package tiralabra.utils;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 /**
  * Simple HashMap implementation.
  *
@@ -35,6 +38,18 @@ public class HashMap<K, V> {
       key = k;
       value = v;
     }
+
+    public V getValue() {
+      return value;
+    }
+
+    public Entry orInsert(V value) {
+      if (this.value == null) {
+        this.value = value;
+      }
+
+      return this;
+    }
   }
 
   /**
@@ -62,6 +77,18 @@ public class HashMap<K, V> {
 
     for (int i = 0; i < 128; i++)
       table[i] = null;
+  }
+
+  public Entry entry(K key) {
+    int i = hash(key) % table.length;
+
+    while (table[i] != null && ((Entry) table[i]).key.equals(key)) i++;
+
+    if (table[i] == null) {
+      table[i] = new Entry(key, null);
+    }
+
+    return (Entry) table[i];
   }
 
   private int hash(Object key) {
@@ -127,5 +154,11 @@ public class HashMap<K, V> {
     }
 
     return entry.value;
+  }
+
+  public Stream<Entry> entries() {
+    return Arrays.stream(table)
+      .filter(entry -> entry != null)
+      .map(entry -> (Entry) entry);
   }
 }

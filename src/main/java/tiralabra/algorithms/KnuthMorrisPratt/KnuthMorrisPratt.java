@@ -8,6 +8,7 @@ package tiralabra.algorithms.KnuthMorrisPratt;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcher.Match;
+import tiralabra.algorithms.StringMatcherBuilder;
 
 public class KnuthMorrisPratt implements StringMatcher {
   byte[] pattern;
@@ -36,6 +37,10 @@ public class KnuthMorrisPratt implements StringMatcher {
     this.pattern = pattern;
 
     buildSkipTable();
+  }
+
+  public static StringMatcherBuilder getBuilder() {
+    return new KnuthMorrisPrattBuilder().adapt();
   }
 
   void buildSkipTable() {

@@ -5,6 +5,9 @@
 
 package tiralabra.utils;
 
+import java.util.stream.Stream;
+import java.util.Arrays;
+
 /**
  * Simple resizeable array implementation.
  */
@@ -127,5 +130,9 @@ public class ArrayList<T> {
     System.arraycopy(array, 0, newArray, 0, size);
 
     return (T[]) newArray;
+  }
+
+  public Stream<T> getStream() {
+    return Arrays.stream(array).map(entry -> (T) entry).limit(size);
   }
 }

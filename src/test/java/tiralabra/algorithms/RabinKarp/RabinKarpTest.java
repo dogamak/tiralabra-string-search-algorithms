@@ -30,7 +30,7 @@ public class RabinKarpTest {
     StringMatcher rk = new RabinKarpBuilder()
       .addPattern("asxa".getBytes())
       .addPattern("sxa".getBytes())
-      .build();
+      .buildMatcher();
 
     rk.pushString("xasxasd");
 
