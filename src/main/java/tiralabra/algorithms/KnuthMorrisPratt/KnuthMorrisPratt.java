@@ -93,10 +93,6 @@ public class KnuthMorrisPratt implements StringMatcher {
     return bytes_to_buffer;
   }
 
-  void finish() {
-    // process();
-  }
-
   void advance() {
     pattern_offset += 1;
     input_offset += 1;

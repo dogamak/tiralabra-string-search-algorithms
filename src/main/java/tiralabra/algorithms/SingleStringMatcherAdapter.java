@@ -68,6 +68,13 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
         matcher.pushByte(b);
       }
     }
+
+    /** {@inheritDoc} */
+    public void finish() {
+      for (int i = 0; i < matchers.size(); i++) {
+        matchers.get(i).finish();
+      }
+    }
   }
 
   /**

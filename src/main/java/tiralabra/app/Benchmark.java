@@ -43,6 +43,8 @@ public class Benchmark {
       for (int j = 0; j < streams[i].length; j++) {
         matchers[i].pushByte(streams[i][j]);
       }
+
+      matchers[i].finish();
     }
   }
 }

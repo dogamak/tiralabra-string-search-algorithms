@@ -27,6 +27,8 @@ public interface StringMatcher {
   public Match pollMatch();
   public void pushByte(byte b);
 
+  default public void finish() {}
+
   default public void pushBytes(byte[] bytes) {
     for (byte b : bytes)
       pushByte(b);

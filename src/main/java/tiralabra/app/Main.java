@@ -211,20 +211,24 @@ public class Main {
         InputSource input = inputs.get(inputIndex);
         int inputByte = input.stream.read();
 
-        if (inputByte == -1) {
-          break;
-        }
-
         for (int i = 0; i < input.matchers.size(); i++) {
           StringMatcher matcher = input.matchers.get(i);
 
-          matcher.pushByte((byte) inputByte);
+          if (inputByte != -1) {
+            matcher.pushByte((byte) inputByte);
+          } else {
+            matcher.finish();
+          }
 
           Match match = matcher.pollMatch();
 
           if (match != null) {
             System.out.println("Match at offset " + match.getOffset() + " on input " + input.name + ": " + new String(match.getSubstring(), "UTF-8"));
           }
+        }
+
+        if (inputByte == -1) {
+          break;
         }
       }
     } catch (IOException ioe) {
