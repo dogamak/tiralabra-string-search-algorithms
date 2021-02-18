@@ -7,6 +7,7 @@ package tiralabra.app;
 
 import tiralabra.utils.ArrayList;
 import java.util.stream.Stream;
+import java.io.IOException;
 
 /**
  * Formatter for formatting and outputting the results of executed benchmarks.
@@ -55,15 +56,17 @@ public abstract class ResultFormatter {
    * of the algorithms and benchmarks with the {@link #defineBenchmark} and {@link #defineAlgorithm}
    * methods.
    */
-  public void begin() {}
+  public void begin() throws IOException {}
 
   /**
    * Called after each benchmark has been executed using a single algorithm.
    */
-  public abstract void format(BenchmarkResult results);
+  public abstract void format(BenchmarkResult results) throws IOException;
 
   /**
    * Called after all benchmarks have been executed.
    */
-  public void end() {}
+  public void end() throws IOException {}
 }
+
+

@@ -59,7 +59,7 @@ public class BenchmarkRunner {
   /**
    * A formatter for outputting the benchmark results.
    */
-  private static ResultFormatter formatter = new TerminalResultFormatter();
+  private static ResultFormatter formatter = new BrowserResultFormatter(new File("results.html"));
 
   BenchmarkRunner() {
     algorithms = new Algorithm[] {
@@ -98,22 +98,27 @@ public class BenchmarkRunner {
       formatter.defineAlgorithm(algo.name);
     }
 
-    formatter.begin();
+    try {
+      formatter.begin();
 
-    templates.getStream()
-      .forEach((template) -> {
+      for (int i = 0; i < templates.size(); i++) {
+        BenchmarkTemplate template = templates.get(i);
+
         for (Algorithm algorithm : algorithms) {
           runBenchmark(template, algorithm);
         }
-      });
+      }
 
-    formatter.end();
+      formatter.end();
+    } catch (IOException ioe) {
+      System.err.println("Unable to write benchmark results: " + ioe);
+    }
   }
 
   /**
    * Runs a benchmark using the given template and algorithm.
    */
-  private void runBenchmark(BenchmarkTemplate benchmark, Algorithm algorithm) {
+  private void runBenchmark(BenchmarkTemplate benchmark, Algorithm algorithm) throws IOException {
     long init_time = 0;
     long exec_time = 0;
 
@@ -135,12 +140,14 @@ public class BenchmarkRunner {
 
     BenchmarkResult result = new BenchmarkResult(algorithm.name, benchmark.getName(), init_per_cycle, exec_per_cycle);
 
-    results
+    /*results
       .entry(benchmark.getName())
       .orInsert(new HashMap<>())
       .getValue()
-      .insert(algorithm.name, new double[] { init_per_cycle, exec_per_cycle });
+      .insert(algorithm.name, new double[] { init_per_cycle, exec_per_cycle });*/
 
     formatter.format(result);
   }
 }
+
+
