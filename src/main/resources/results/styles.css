@@ -1,0 +1,45 @@
+body {
+  font-family: sans-serif;
+}
+
+th, td {
+  padding: 0.5em;
+  vertical-align: top;
+  text-align: left;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.9em;
+}
+
+.metric-group {
+  margin-bottom: 0.5em;
+}
+
+.metric-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.meter {
+    width: 100%;
+    height: 1em;
+    background-color: #e2e2e2;
+}
+
+.meter div {
+    height: 100%;
+    display: inline-block;
+}
+
+.init-time {
+    background-color: green;
+}
+
+.exec-time {
+    background-color: #0fb70f;
+}
+
+td {
+    width: 11em;
+}
