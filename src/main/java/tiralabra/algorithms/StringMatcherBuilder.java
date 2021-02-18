@@ -19,6 +19,10 @@ public interface StringMatcherBuilder extends SingleStringMatcherBuilder {
    */
   public StringMatcherBuilder addPattern(byte[] pattern);
 
+  default public StringMatcherBuilder addPattern(String pattern) {
+    return addPattern(pattern.getBytes());
+  }
+
   /**
    * Constructs a string matcher for matching the patterns
    * defined with {@link #addPattern}.
