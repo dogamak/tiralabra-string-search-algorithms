@@ -5,7 +5,7 @@
 
 package tiralabra.app;
 
-import tiralabra.utils.HashMap;
+import tiralabra.algorithms.NaiveSearch.NaiveSearch;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcherBuilderFactory;
 import tiralabra.algorithms.RabinKarp.RabinKarp;
@@ -63,8 +63,10 @@ public class BenchmarkRunner {
 
   BenchmarkRunner() {
     algorithms = new Algorithm[] {
-      new Algorithm("rabin-karp", RabinKarp::getBuilder),
-      new Algorithm("knuth-morris-pratt", KnuthMorrisPratt::getBuilder),
+      new Algorithm("Rabin-Karp", RabinKarp::getBuilder),
+      new Algorithm("Knuth-Morris-Pratt", KnuthMorrisPratt::getBuilder),
+      new Algorithm("Boyer-Moore", KnuthMorrisPratt::getBuilder),
+      new Algorithm("Naïve Search", NaiveSearch::getBuilder),
     };
   }
   
