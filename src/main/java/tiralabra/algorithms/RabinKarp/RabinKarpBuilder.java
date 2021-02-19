@@ -10,15 +10,12 @@ import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.algorithms.StringMatcher;
 
 public class RabinKarpBuilder implements StringMatcherBuilder {
-  private RollingHashFunctionFactory hashFactory;
+  private RollingHashFunctionFactory hashFactory = SimpleModuloHash::new;
   private ArrayList<byte[]> patterns = new ArrayList<>();
 
-  public RabinKarpBuilder() {
-    this((n) -> new SimpleModuloHash(n));
-  }
-
-  public RabinKarpBuilder(RollingHashFunctionFactory hashFactory) {
-    this.hashFactory = hashFactory;
+  public RabinKarpBuilder setHashFunction(RollingHashFunctionFactory factory) {
+    this.hashFactory = factory;
+    return this;
   }
 
   public StringMatcherBuilder addPattern(byte[] bytes) {
@@ -31,7 +28,7 @@ public class RabinKarpBuilder implements StringMatcherBuilder {
     byte[][] array = new byte[patterns.size()][];
 
     for (int i = 0; i < patterns.size(); i++) {
-      array[i] = (byte[]) patterns.get(i);
+      array[i] = patterns.get(i);
     }
 
     return new RabinKarp(array, hashFactory);
