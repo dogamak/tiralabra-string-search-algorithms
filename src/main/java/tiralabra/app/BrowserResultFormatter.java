@@ -55,7 +55,7 @@ public class BrowserResultFormatter extends ResultFormatter {
     Object[] algorithms = getAlgorithms().toArray();
 
     for (Object algo : algorithms) {
-      writer.write("<th>" + algo + "</th>");
+      writer.write("<th><span>" + algo + "</span></th>");
     }
 
     writer.write("</tr>");
@@ -70,12 +70,12 @@ public class BrowserResultFormatter extends ResultFormatter {
       writer.write("<tr><th>" + result.getName() + "</th>");
     }
 
-    writer.write("<td data-init=\"" + result.getAverageInitTime() + "\" data-exec=\"" + result.getAverageExecTime() + "\">");
+    writer.write("<td data-init=\"" + result.getAverageInitTime() + "\" data-exec=\"" + result.getAverageExecTime() + "\"><div class=\"cell-wrapper\">");
 
     writeMetric("Initialization", "ms/iter", result.getAverageInitTime());
     writeMetric("Execution", "ms/iter", result.getAverageExecTime());
 
-    writer.write("</td>");
+    writer.write("</div></td>");
 
     prevBenchmark = result.getName();
   }

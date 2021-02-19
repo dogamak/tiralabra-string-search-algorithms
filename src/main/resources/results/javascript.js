@@ -17,16 +17,26 @@ $('tr:not(:first-child)')
 
       const meter = $('<div>')
         .addClass('meter')
-        .appendTo(td);
+        .appendTo($(td).find('.cell-wrapper'));
 
       $('<div>')
         .addClass('init-time')
-        .css('width', `${ init / highestCumulative * 100 }%`)
+        .css('flex-grow', init / highestCumulative * 1000)
         .appendTo(meter);
 
       $('<div>')
         .addClass('exec-time')
-        .css('width', `${ exec / highestCumulative * 100 }%`)
+        .css('flex-grow', exec / highestCumulative * 1000)
         .appendTo(meter);
+
+      const empty = $('<div>')
+        .addClass('meter-empty')
+        .css('flex-grow', 1000 - (init + exec) / highestCumulative * 1000)
+        .appendTo(meter);
+
+      $(td).hover(
+        () => empty.css('flex-grow', 0),
+        () => empty.css('flex-grow', 1000 - (init + exec) / highestCumulative * 1000),
+      );
     });
   });

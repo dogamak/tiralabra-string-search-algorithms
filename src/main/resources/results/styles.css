@@ -2,10 +2,19 @@ body {
   font-family: sans-serif;
 }
 
+tr:first-child th span {
+  transform: rotate(90deg);
+}
+
 th, td {
   padding: 0.5em;
   vertical-align: top;
   text-align: left;
+}
+
+.cell-wrapper {
+  position: relative;
+  padding-left: 1.5em;
 }
 
 .metric-label {
@@ -22,14 +31,23 @@ th, td {
 }
 
 .meter {
-    width: 100%;
-    height: 1em;
+    width: 1em;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
     background-color: #e2e2e2;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
 }
 
 .meter div {
-    height: 100%;
-    display: inline-block;
+    width: 100%;
+}
+
+.meter:hover .meter-empty {
+  flex-grow: 0;
 }
 
 .init-time {
