@@ -2,8 +2,16 @@ body {
   font-family: sans-serif;
 }
 
-tr:first-child th span {
-  transform: rotate(90deg);
+ul {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 3em;
+  list-style: none;
+}
+
+tr:first-child th {
+  height: 4em;
 }
 
 th, td {
@@ -44,6 +52,7 @@ th, td {
 
 .meter div {
     width: 100%;
+    transition-duration: 100ms;
 }
 
 .meter:hover .meter-empty {
