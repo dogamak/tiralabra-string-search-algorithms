@@ -5,7 +5,10 @@
 
 package tiralabra.app;
 
+import tiralabra.algorithms.BoyerMoore.BoyerMoore;
 import tiralabra.algorithms.NaiveSearch.NaiveSearch;
+import tiralabra.algorithms.RabinKarp.BitShiftHash;
+import tiralabra.algorithms.RabinKarp.SimpleModuloHash;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcherBuilderFactory;
 import tiralabra.algorithms.RabinKarp.RabinKarp;
@@ -63,9 +66,10 @@ public class BenchmarkRunner {
 
   BenchmarkRunner() {
     algorithms = new Algorithm[] {
-      new Algorithm("Rabin-Karp", RabinKarp::getBuilder),
+      new Algorithm("Rabin-Karp (Bit Shift)", () -> RabinKarp.getBuilder().setHashFunction(BitShiftHash::new)),
+      new Algorithm("Rabin-Karp (Simple Modulo)", () -> RabinKarp.getBuilder().setHashFunction(SimpleModuloHash::new)),
       new Algorithm("Knuth-Morris-Pratt", KnuthMorrisPratt::getBuilder),
-      new Algorithm("Boyer-Moore", KnuthMorrisPratt::getBuilder),
+      new Algorithm("Boyer-Moore", BoyerMoore::getBuilder),
       new Algorithm("Naïve Search", NaiveSearch::getBuilder),
     };
   }
