@@ -71,7 +71,7 @@ public class RabinKarp implements StringMatcher {
     suspectedMatches = new ArrayList<>(substrings.length);
   }
 
-  public static StringMatcherBuilder getBuilder() {
+  public static RabinKarpBuilder getBuilder() {
     return new RabinKarpBuilder();
   }
 
@@ -96,7 +96,6 @@ public class RabinKarp implements StringMatcher {
     }
 
     ArrayList<byte[]> matches = substringHashes.get(hash.getHash());
-
 
     if (matches != null && bufferSize >= windowSize) {
 outer:

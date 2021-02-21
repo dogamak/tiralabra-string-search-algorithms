@@ -29,7 +29,7 @@ public class SimpleModuloHash extends RollingHashFunction {
    */
   private static int modulo = 101;
 
-  SimpleModuloHash (int windowSize) {
+  public SimpleModuloHash (int windowSize) {
     super(windowSize);
   }
 

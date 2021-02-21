@@ -4,7 +4,7 @@ public class BitShiftHash extends RollingHashFunction {
     private int hash = 0;
 
     /** {@inheritDoc} */
-    BitShiftHash(int windowSize) {
+    public BitShiftHash(int windowSize) {
         super(windowSize);
     }
 
@@ -15,6 +15,6 @@ public class BitShiftHash extends RollingHashFunction {
 
     @Override
     public Object getHash() {
-        return hash;
+        return Integer.toUnsignedLong(hash);
     }
 }
