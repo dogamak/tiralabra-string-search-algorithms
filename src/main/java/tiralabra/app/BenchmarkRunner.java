@@ -107,6 +107,8 @@ public class BenchmarkRunner {
       try {
         BenchmarkTemplate template = BenchmarkTemplate.fromFile(benchmarkFile);
 
+        System.out.format("Loaded benchmark '%s'\n", template.getName());
+
         templates.add(template);
 
         formatter.defineBenchmark(template.getName());
@@ -143,17 +145,30 @@ public class BenchmarkRunner {
     long init_time = 0;
     long exec_time = 0;
 
-    for (int i = 0; i < CYCLE_COUNT; i++) {
-      long init_start = System.nanoTime();
-      Benchmark initialized = benchmark.initialize(algorithm.factory);
-      long init_end = System.nanoTime();
+    System.out.format("Running benchmark '%s' with algorithm '%s'... ", benchmark.getName(), algorithm.name);
+    boolean failure = false;
 
-      long exec_start = System.nanoTime();
-      initialized.execute();
-      long exec_end = System.nanoTime();
+    try {
+      for (int i = 0; i < CYCLE_COUNT; i++) {
+        long init_start = System.nanoTime();
+        Benchmark initialized = benchmark.initialize(algorithm.factory);
+        long init_end = System.nanoTime();
 
-      init_time += init_end - init_start;
-      exec_time += exec_end - exec_start;
+        long exec_start = System.nanoTime();
+        initialized.execute();
+        long exec_end = System.nanoTime();
+
+        init_time += init_end - init_start;
+        exec_time += exec_end - exec_start;
+      }
+    } catch (Exception e) {
+      failure = true;
+      System.out.println("FAIL");
+      e.printStackTrace(System.err);
+    }
+
+    if (!failure) {
+      System.out.println("FINISHED");
     }
 
     double init_per_cycle = (double) init_time / (double) CYCLE_COUNT / 1000000;
