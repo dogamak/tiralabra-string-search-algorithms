@@ -85,12 +85,27 @@ public class BenchmarkRunner {
    * Create benchmarks from the specified benchmark template files and execute them
    * for each of the supported search-algorithms.
    */
-  private void run(String[] benchmarkFiles) {
-    ArrayList<BenchmarkTemplate> templates = new ArrayList<>(benchmarkFiles.length);
+  private void run(String[] benchmarkPaths) {
+    ArrayList<BenchmarkTemplate> templates = new ArrayList<>(benchmarkPaths.length);
+    ArrayList<File> benchmarkFiles = new ArrayList<>();
 
-    for (String benchmarkFile : benchmarkFiles) {
+    for (String path : benchmarkPaths) {
+      File file = new File(path);
+
+      if (file.isDirectory()) {
+        for (File dirFile : file.listFiles()) {
+          benchmarkFiles.add(dirFile);
+        }
+      } else {
+        benchmarkFiles.add(file);
+      }
+    }
+
+    for (int i = 0; i < benchmarkFiles.size(); i++) {
+      File benchmarkFile = benchmarkFiles.get(i);
+
       try {
-        BenchmarkTemplate template = BenchmarkTemplate.fromFile(new File(benchmarkFile));
+        BenchmarkTemplate template = BenchmarkTemplate.fromFile(benchmarkFile);
 
         templates.add(template);
 
