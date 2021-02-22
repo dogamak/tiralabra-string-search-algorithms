@@ -61,6 +61,6 @@ following command after building the project:
 java -cp build/libs/tiralabra.jar tiralabra.app.BenchmarkRunner benchmarks/*
 ```
 This command generates a file named `results.html` in the current working directory.
-Below is a screenshot of a file generated in this way:
+Below is a screenshot of a file generated in this way: (A not-neccessarily-up-to-date version of this file can be viewed [here](https://karhusaari.me/tiralabra.html).)
 
 ![](./benchmarks.png)
