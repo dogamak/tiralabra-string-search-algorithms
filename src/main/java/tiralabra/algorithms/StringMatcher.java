@@ -5,7 +5,10 @@
 
 package tiralabra.algorithms;
 
-public interface StringMatcher {
+import tiralabra.utils.ArrayList;
+import tiralabra.utils.RingBuffer;
+
+public abstract class StringMatcher {
   public class Match {
     private int offset;
     private byte[] substring;
@@ -24,17 +27,56 @@ public interface StringMatcher {
     }
   }
 
-  public Match pollMatch();
-  public void pushByte(byte b);
+  private ArrayList<Match> matches = new ArrayList<>();
+  private boolean hasFinished = false;
 
-  default public void finish() {}
-
-  default public void pushBytes(byte[] bytes) {
-    for (byte b : bytes)
-      pushByte(b);
+  protected void addMatch(int offset, byte[] substring) {
+    matches.add(new Match(offset, substring));
   }
 
-  default public void pushString(String str) {
+  public Match pollMatch() {
+    if (matches.size() == 0)
+      return null;
+
+    return matches.remove(0);
+  }
+
+  private RingBuffer buffer = new RingBuffer();
+
+  protected void setMinimumBufferSize(int size) {
+      if (buffer.capacity() < size) {
+        buffer.setCapacity(size);
+      }
+  }
+
+  public boolean pushByte(byte b) {
+    return buffer.pushByte(b);
+  }
+
+  public int pushBytes(byte[] bytes) {
+      return buffer.pushArray(bytes);
+  }
+
+  public int pushBytes(byte[] bytes, int offset, int size) {
+      return buffer.pushArray(bytes, offset, size);
+  }
+
+  public void pushString(String str) {
     pushBytes(str.getBytes());
+  }
+
+  protected RingBuffer getBuffer() {
+    return buffer;
+  }
+
+  public void process() {}
+
+  public void finish() {
+    hasFinished = true;
+    process();
+  }
+
+  public boolean hasFinished() {
+    return hasFinished;
   }
 }

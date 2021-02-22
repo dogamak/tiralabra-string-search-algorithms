@@ -33,6 +33,7 @@ public class RabinKarpTest {
       .buildMatcher();
 
     rk.pushString("xasxasd");
+    rk.finish();
 
     Match match1 = rk.pollMatch();
     Match match2 = rk.pollMatch();

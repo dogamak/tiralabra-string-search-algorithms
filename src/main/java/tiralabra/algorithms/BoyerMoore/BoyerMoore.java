@@ -9,8 +9,9 @@ import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.algorithms.SingleStringMatcherBuilder;
 import tiralabra.utils.ArrayList;
+import tiralabra.utils.RingBuffer;
 
-public class BoyerMoore implements StringMatcher {
+public class BoyerMoore extends StringMatcher {
   private ArrayList[] bad_character_table = new ArrayList[256];
   private int[] good_suffix_table;
   private int[] full_shift_table;
@@ -18,6 +19,9 @@ public class BoyerMoore implements StringMatcher {
 
   public BoyerMoore(byte[] pattern) {
     this.pattern = pattern;
+    this.backbuffer_size = pattern.length - 1;
+    // this.cursor = pattern.length - 1;
+
     preprocess_bad_character_table();
     preprocess_good_suffix_table();
     preprocess_full_shift_table();
@@ -204,23 +208,31 @@ public class BoyerMoore implements StringMatcher {
     }
   }
 
-  public void process(byte[] buffer) {
-    int cursor = pattern.length - 1;
+  private int backbuffer_size;
+  private int cursor = 0;
+  private int buffer_start = 0;
 
-    while (cursor < buffer.length) {
+  public void process() {
+    RingBuffer buffer = getBuffer();
+
+    while (buffer.size() > backbuffer_size + cursor - buffer_start) {
+      int drop_bytes = Math.max(0, cursor - buffer_start - backbuffer_size);
+      buffer.advance(drop_bytes);
+      buffer_start += drop_bytes;
+
       int pattern_offset = pattern.length - 1;
-      int buffer_offset = cursor;
+      int buffer_offset = backbuffer_size + cursor - buffer_start;
 
-      while (pattern_offset >= 0 && pattern[pattern_offset] == buffer[buffer_offset]) {
+      while (pattern_offset >= 0 && pattern[pattern_offset] == (buffer.get(buffer_offset) & 0xFF)) {
         pattern_offset -= 1;
         buffer_offset -= 1;
       }
 
       if (pattern_offset == -1) {
-        matches.add(new Match(buffer_offset + 1, pattern));
+        addMatch(buffer_start + buffer_offset + 1, pattern);
         cursor += pattern.length == 0 ? 1 : pattern.length - full_shift_table[1];
       } else {
-        int char_shift = pattern_offset - (int) bad_character_table[buffer[buffer_offset]].get(pattern_offset);
+        int char_shift = pattern_offset - (int) bad_character_table[buffer.get(buffer_offset) & 0xFF].get(pattern_offset);
         int suffix_shift = 0;
 
         if (pattern_offset + 1 == pattern.length) {
@@ -231,33 +243,8 @@ public class BoyerMoore implements StringMatcher {
           suffix_shift = pattern.length - 1 - good_suffix_table[pattern_offset + 1];
         }
 
-        cursor += char_shift < suffix_shift ? suffix_shift : char_shift;
+        cursor += Math.max(char_shift, suffix_shift);
       }
     }
-  }
-
-  // XXX FIXME
-  private ArrayList<Byte> buffer = new ArrayList<>();
-  private ArrayList<Match> matches = new ArrayList<>();
-
-  public void pushByte(byte b) {
-    buffer.add(b);
-  }
-
-  public void finish() {
-    byte[] buf = new byte[buffer.size()];
-
-    for (int i = 0; i < buffer.size(); i++)
-      buf[i] = (byte) buffer.get(i);
-
-    process(buf);
-  }
-
-  public Match pollMatch() {
-    if (matches.size() == 0) {
-      return null;
-    }
-
-    return matches.remove(0);
   }
 }

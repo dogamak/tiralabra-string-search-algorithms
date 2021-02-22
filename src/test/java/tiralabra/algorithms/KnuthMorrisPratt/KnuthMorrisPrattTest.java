@@ -15,9 +15,8 @@ public class KnuthMorrisPrattTest {
   void simple() {
     KnuthMorrisPratt kmp = new KnuthMorrisPratt("ABCAB".getBytes());
 
-    for (byte ch : "ABABCABCABCX".getBytes()) {
-      kmp.pushByte(ch);
-    }
+    kmp.pushString("ABABCABCABCX");
+    kmp.finish();
     
     Match m1 = kmp.pollMatch();
     Match m2 = kmp.pollMatch();

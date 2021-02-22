@@ -11,8 +11,9 @@ import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcherBuilder;
+import tiralabra.utils.RingBuffer;
 
-public class RabinKarp implements StringMatcher {
+public class RabinKarp extends StringMatcher {
   private class SuspectedMatchState {
     int offset = 0;
     byte[] substring;
@@ -27,11 +28,7 @@ public class RabinKarp implements StringMatcher {
   private RollingHashFunction hash;
   private int inputOffset = 0;
   private int windowSize;
-  private byte[] buffer;
-  private int bufferHead = 0;
-  private int bufferSize = 0;
   private ArrayList<SuspectedMatchState> suspectedMatches;
-  private ArrayList<Match> pendingMatches = new ArrayList<>();
 
   RabinKarp(byte[][] substrings, RollingHashFunctionFactory hashFactory) {
     this.hashFactory = hashFactory;
@@ -67,7 +64,6 @@ public class RabinKarp implements StringMatcher {
 
     hash = hashFactory.create(windowSize);
 
-    buffer = new byte[bufferCapacity];
     suspectedMatches = new ArrayList<>(substrings.length);
   }
 
@@ -75,77 +71,61 @@ public class RabinKarp implements StringMatcher {
     return new RabinKarpBuilder();
   }
 
-  private void pushBuffer(byte b) {
-    bufferHead = (bufferHead + 1) % buffer.length;
-    buffer[bufferHead] = b;
+  public void process() {
+    RingBuffer buffer = getBuffer();
 
-    if (bufferSize < buffer.length) {
-      bufferSize += 1;
-    }
-  }
+    int cursor = 0;
 
-  public void pushByte(byte b) {
-    // System.out.println("---");
+    while (buffer.size() > 0) {
+      inputOffset += 1;
 
-    hash.pushByte(b);
-    pushBuffer(b);
-    inputOffset += 1;
+      hash.pushByte(buffer.get(cursor));
 
-    for (int i = 0; i < suspectedMatches.size(); i++) {
-      suspectedMatches.get(i).offset += 1;
-    }
-
-    ArrayList<byte[]> matches = substringHashes.get(hash.getHash());
-
-    if (matches != null && bufferSize >= windowSize) {
-outer:
-      for (int i = 0; i < matches.size(); i++) {
-        byte[] pattern = matches.get(i);
-
-        for (int j = 0; j < windowSize; j++) {
-          byte bufferByte = buffer[(bufferHead + buffer.length - windowSize + j + 1) % buffer.length];
-
-          // System.out.format("%s == %s\n", (char) bufferByte, (char) pattern[j]);
-
-          if (bufferByte != pattern[j])
-            continue outer;
-        }
-
-        suspectedMatches.add(new SuspectedMatchState(pattern));
+      if (cursor >= windowSize) {
+        buffer.advance(1);
+      } else {
+        cursor++;
       }
-    }
 
-outer:
-    for (int i = 0; i < suspectedMatches.size(); i++) {
-      SuspectedMatchState state = suspectedMatches.get(i);
+      for (int i = 0; i < suspectedMatches.size(); i++) {
+        suspectedMatches.get(i).offset += 1;
+      }
 
-      // System.out.format("%d %d %d\n", state.offset, state.substring.length, windowSize);
+      ArrayList<byte[]> matches = substringHashes.get(hash.getHash());
 
-      if (state.offset == state.substring.length - windowSize) {
-        suspectedMatches.remove(i);
-        i--;
+      if (matches != null && cursor == windowSize) {
+        outer:
+        for (int i = 0; i < matches.size(); i++) {
+          byte[] pattern = matches.get(i);
 
-        for (int j = 0; j < state.offset; j++) {
-          byte bufferByte = buffer[(bufferHead + 1 + buffer.length - (state.substring.length - windowSize) + j) % buffer.length];
-
-          // System.out.format("%s == %s\n", (char) bufferByte, (char) state.substring[windowSize + j]);
-
-          if (bufferByte != state.substring[windowSize + j]) {
-            continue outer;
+          for (int j = 0; j < windowSize; j++) {
+            if (buffer.get(j) != pattern[j])
+              continue outer;
           }
-        }
 
-        pendingMatches.add(new Match(inputOffset - state.substring.length, state.substring));
-        // System.out.println("Match: " + new String(state.substring, StandardCharsets.UTF_8));
+          suspectedMatches.add(new SuspectedMatchState(pattern));
+        }
+      }
+
+      outer:
+      for (int i = 0; i < suspectedMatches.size(); i++) {
+        SuspectedMatchState state = suspectedMatches.get(i);
+
+        if (state.offset == state.substring.length - windowSize) {
+          suspectedMatches.remove(i);
+          i--;
+
+          for (int j = 0; j < state.offset; j++) {
+            byte bufferByte = buffer.get(state.substring.length - windowSize + j + 1);
+
+            if (bufferByte != state.substring[windowSize + j]) {
+              continue outer;
+            }
+          }
+
+          addMatch(inputOffset - state.substring.length, state.substring);
+        }
       }
     }
-  }
-
-  public Match pollMatch() {
-    if (pendingMatches.size() != 0) {
-      return pendingMatches.remove(0);
-    }
-    
-    return null;
   }
 }

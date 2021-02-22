@@ -3,8 +3,9 @@ package tiralabra.algorithms.NaiveSearch;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.utils.ArrayList;
+import tiralabra.utils.RingBuffer;
 
-public class NaiveSearch implements StringMatcher {
+public class NaiveSearch extends StringMatcher {
     byte[][] patterns;
     int[][] pattern_offsets;
     int[] pattern_offset_counts;
@@ -44,16 +45,15 @@ public class NaiveSearch implements StringMatcher {
     }
 
     private int inputOffset = 0;
-    private ArrayList<StringMatcher.Match> matches = new ArrayList<>();
 
-    public StringMatcher.Match pollMatch() {
-        if (matches.size() == 0)
-            return null;
+    public void process() {
+        RingBuffer buffer = getBuffer();
 
-        return matches.remove(0);
+        while (buffer.size() > 0)
+            processByte(buffer.pop());
     }
 
-    public void pushByte(byte b) {
+    public void processByte(byte b) {
         for (int i = 0; i < patterns.length; i++) {
             boolean new_offset_added = false;
 
@@ -65,7 +65,7 @@ public class NaiveSearch implements StringMatcher {
                 if (patterns[i][offset] == b) {
                     if (offset == patterns[i].length - 1) {
                         remove_offset = true;
-                        matches.add(new StringMatcher.Match(inputOffset + 1 - patterns[i].length, patterns[i]));
+                        addMatch(inputOffset + 1 - patterns[i].length, patterns[i]);
                     } else {
                         pattern_offsets[i][j]++;
                     }

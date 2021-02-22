@@ -40,8 +40,12 @@ public class Benchmark {
    */
   public void execute() {
     for (int i = 0; i < matchers.length; i++) {
-      for (int j = 0; j < streams[i].length; j++) {
-        matchers[i].pushByte(streams[i][j]);
+      int consumed = 0;
+
+      while (consumed < streams[i].length) {
+        consumed += matchers[i].pushBytes(streams[i], consumed, streams[i].length - consumed);
+        matchers[i].process();
+        // System.out.format("Consumed: %d/%d\n", consumed, streams[i].length);
       }
 
       matchers[i].finish();

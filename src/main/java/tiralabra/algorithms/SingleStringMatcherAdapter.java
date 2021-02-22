@@ -28,11 +28,12 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
   /**
    * String matcher class whose instances are returned by the adapting builder.  
    */
-  public class AdaptedStringMatcher implements StringMatcher {
+  public class AdaptedStringMatcher extends StringMatcher {
     /**
      * List of the wrapped single-pattern matchers. One for each of the matched patterns.
      */
     ArrayList<StringMatcher> matchers = new ArrayList<>(patterns.size());
+
 
     /**
      * Initialize the matcher by building the wrapped matchers from the list of patterns.
@@ -62,17 +63,70 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
     /**
      * {@inheritDoc}
      */
-    public void pushByte(byte b) {
+    public boolean pushByte(byte b) {
       for (int i = 0; i < matchers.size(); i++) {
         StringMatcher matcher = matchers.get(i);
-        matcher.pushByte(b);
+
+        while (!matcher.pushByte(b))
+          matcher.process();
       }
+
+      return true;
+    }
+
+    /** {@inheritDoc} */
+    public int pushBytes(byte[] source, int offset, int size) {
+      int[] consumed = new int[matchers.size()];
+      boolean[] finished = new boolean[matchers.size()];
+      int most_consumed = 0;
+      int i = 0;
+      int finished_matchers = 0;
+
+      while (finished_matchers < matchers.size()) {
+        i = (i + 1) % matchers.size();
+        StringMatcher matcher = matchers.get(i);
+
+        int matcher_consumed = consumed[i];
+        boolean first_iteration = matcher_consumed == 0;
+
+        if (matcher_consumed >= most_consumed && !first_iteration) {
+          if (!finished[i]) {
+            finished_matchers++;
+            finished[i] = true;
+          }
+
+          continue;
+        }
+
+        int bytes = matcher.pushBytes(source, offset + matcher_consumed, size - matcher_consumed);
+        consumed[i] += bytes;
+
+        if (bytes == 0)
+          matcher.process();
+
+        if (first_iteration && bytes > most_consumed)
+            most_consumed = bytes;
+      }
+
+      return most_consumed;
+    }
+
+    /** {@inheritDoc} */
+    public int pushBytes(byte[] source) {
+      return pushBytes(source, 0, source.length);
     }
 
     /** {@inheritDoc} */
     public void finish() {
       for (int i = 0; i < matchers.size(); i++) {
         matchers.get(i).finish();
+      }
+    }
+
+    /** {@inheritDoc} */
+    public void process() {
+      for (int i = 0; i < matchers.size(); i++) {
+        matchers.get(i).process();
       }
     }
   }
