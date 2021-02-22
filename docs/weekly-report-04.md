@@ -2,7 +2,7 @@
 
 ## What has been worked on?
 
- * Generation of a HTML benchmark results page was implemented.
+ * Generation of a HTML benchmark results page was implemented. ([Hosted example](https://karhusaari.me/tiralabra.html))
  * The Boyer-Moore search algorithm was implemented.
  * A fast bit shift based variant of the Rabin-Karp algorithm was implemented.
  * Measuring the variance of benchmark iterations was implemented.
