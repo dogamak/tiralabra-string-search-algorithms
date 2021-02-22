@@ -23,11 +23,21 @@ public class BenchmarkResult {
    * Average time taken to initialize the algorithm in microseconds.
    */
   private double init_average;
-  
+
+  /**
+   * Variance of the time taken to initialize the algorithm.
+   */
+  private double init_variance;
+
   /**
    * Average time taken to execute the search algorithm itself in microseconds.
    */
   private double exec_average;
+
+  /**
+   * Variance of the time taken to execute the algorithm.
+   */
+  private double exec_variance;
 
   /**
    * Create a new instance containing the results of a single benchmark run.
@@ -37,11 +47,13 @@ public class BenchmarkResult {
    * @param init_average - Average initialization time.
    * @param exec_average - Average execution time.
    */
-  public BenchmarkResult(String algo, String name, double init_average, double exec_average) {
+  public BenchmarkResult(String algo, String name, double init_average, double init_variance, double exec_average, double exec_variance) {
     this.algorithm = algo;
     this.name = name;
     this.init_average = init_average;
+    this.init_variance = init_variance;
     this.exec_average = exec_average;
+    this.exec_variance = exec_variance;
   }
 
   /**
@@ -70,5 +82,19 @@ public class BenchmarkResult {
    */
   public double getAverageExecTime() {
     return exec_average;
+  }
+
+  /**
+   * Get variance of the execution time.
+   */
+  public double getExecTimeVariance() {
+    return exec_variance;
+  }
+
+  /**
+   * Get variance of the initialization time.
+   */
+  public double getInitTimeVariance() {
+      return init_variance;
   }
 }

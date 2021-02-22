@@ -23,6 +23,7 @@ th, td {
 .cell-wrapper {
   position: relative;
   padding-left: 1.5em;
+  white-space: nowrap;
 }
 
 .metric-label {
@@ -30,12 +31,17 @@ th, td {
   font-size: 0.9em;
 }
 
-.metric-group {
+.metric-group:first-child {
   margin-bottom: 0.5em;
 }
 
 .metric-value {
   font-variant-numeric: tabular-nums;
+}
+
+.metric-variance {
+  font-size: 0.8em;
+  color: #0008;
 }
 
 .meter {

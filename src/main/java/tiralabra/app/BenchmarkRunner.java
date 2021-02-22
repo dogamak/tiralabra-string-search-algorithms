@@ -15,6 +15,8 @@ import tiralabra.algorithms.RabinKarp.RabinKarp;
 import tiralabra.algorithms.KnuthMorrisPratt.KnuthMorrisPratt;
 import java.io.IOException;
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 /**
  * A data type containing the name of a search algorithm and a factory instance
@@ -148,18 +150,27 @@ public class BenchmarkRunner {
     System.out.format("Running benchmark '%s' with algorithm '%s'... ", benchmark.getName(), algorithm.name);
     boolean failure = false;
 
+    ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+
+    double[] init_times = new double[CYCLE_COUNT];
+    double[] exec_times = new double[CYCLE_COUNT];
+
+    int warmup_laps = CYCLE_COUNT / 10;
+
     try {
-      for (int i = 0; i < CYCLE_COUNT; i++) {
-        long init_start = System.nanoTime();
+      for (int i = 0; i < CYCLE_COUNT + warmup_laps; i++) {
+        long init_start = threadMXBean.getCurrentThreadCpuTime();
         Benchmark initialized = benchmark.initialize(algorithm.factory);
-        long init_end = System.nanoTime();
+        long init_end = threadMXBean.getCurrentThreadCpuTime();
 
-        long exec_start = System.nanoTime();
+        long exec_start = threadMXBean.getCurrentThreadCpuTime();
         initialized.execute();
-        long exec_end = System.nanoTime();
+        long exec_end = threadMXBean.getCurrentThreadCpuTime();
 
-        init_time += init_end - init_start;
-        exec_time += exec_end - exec_start;
+        if (i >= warmup_laps) {
+          init_time += init_times[i - warmup_laps] = init_end - init_start;
+          exec_time += exec_times[i - warmup_laps] = exec_end - exec_start;
+        }
       }
     } catch (Exception e) {
       failure = true;
@@ -171,16 +182,24 @@ public class BenchmarkRunner {
       System.out.println("FINISHED");
     }
 
-    double init_per_cycle = (double) init_time / (double) CYCLE_COUNT / 1000000;
-    double exec_per_cycle = (double) exec_time / (double) CYCLE_COUNT / 1000000;
+    double init_mean = init_time / (double) CYCLE_COUNT;
+    double exec_mean = exec_time / (double) CYCLE_COUNT;
 
-    BenchmarkResult result = new BenchmarkResult(algorithm.name, benchmark.getName(), init_per_cycle, exec_per_cycle);
+    double init_var = 0;
+    double exec_var = 0;
 
-    /*results
-      .entry(benchmark.getName())
-      .orInsert(new HashMap<>())
-      .getValue()
-      .insert(algorithm.name, new double[] { init_per_cycle, exec_per_cycle });*/
+    for (int i = 0; i < CYCLE_COUNT; i++) {
+      init_var += Math.pow((init_times[i] - init_mean) / 1000000., 2);
+      exec_var += Math.pow((exec_times[i] - exec_mean) / 1000000., 2);
+    }
+
+    init_var /= CYCLE_COUNT - 1.;
+    exec_var /= CYCLE_COUNT - 1.;
+
+    double init_per_cycle = (double) init_time / (double) CYCLE_COUNT / 1000000.;
+    double exec_per_cycle = (double) exec_time / (double) CYCLE_COUNT / 1000000.;
+
+    BenchmarkResult result = new BenchmarkResult(algorithm.name, benchmark.getName(), init_per_cycle, Math.sqrt(init_var), exec_per_cycle, Math.sqrt(exec_var));
 
     formatter.format(result);
   }
