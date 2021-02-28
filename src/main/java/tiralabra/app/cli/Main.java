@@ -3,7 +3,7 @@
  * @created : 2021-01-30
 **/
 
-package tiralabra.app;
+package tiralabra.app.cli;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -58,95 +58,47 @@ public class Main {
     return new SingleStringMatcherAdapter(new KnuthMorrisPrattBuilder());
   }
 
-  private String getFlagLongVariant(String shortFlag) {
-    if (shortFlag.equals("i")) {
-      return "input";
-    } else if (shortFlag.equals("p")) {
-      return "pattern";
-    } else {
-      return null;
-    }
-  }
-
   private void parseArguments(String[] args) {
-    boolean expectFlags = true;
-    int positionalIndex = 0;
+      ArgumentParser parser = new ArgumentParser();
 
-    for (int i = 0; i < args.length; i++) {
-      String arg = args[i];
+      parser.addFlagHandlerValue("i", "input", (flag, value) -> addInput(value));
+      parser.addFlagHandlerValue("p", "pattern", (flag, value) -> addPattern(value));
 
-      if (arg.equals("--")) {
-        expectFlags = false;
-        continue;
+      parser.addFlagHandler("rabin-karp", this::handleAlgorithmFlag);
+      parser.addFlagHandler("knuth-morris-pratt", this::handleAlgorithmFlag);
+
+      parser.addPositionalArgumentHandler(this::handlePositionalArgument);
+
+      try {
+        parser.parse(args);
+      } catch (ArgumentParser.UnknownArgumentException e) {
+          printUsage();
+          System.exit(1);
+      } catch (ArgumentParser.InvalidUsageException e) {
+          System.err.println(e.toString());
+          System.exit(1);
       }
+  }
 
-      boolean longFlag = expectFlags && arg.startsWith("--");
-      boolean shortFlag = expectFlags && !longFlag && arg.startsWith("-") && arg.length() > 1;
+  private void handleAlgorithmFlag(ArgumentParser.FlagOptions flag, String value) {
+    StringMatcherBuilderFactory factory = matcherBuilderFactories.get(flag.getLongName());
 
-      if (longFlag || shortFlag) {
-        String flag = arg;
-        String value = null;
-
-        for (int j = 0; j < flag.length(); j++) {
-          if (flag.charAt(j) == '=') {
-            value = flag.substring(j+1);
-            flag = flag.substring(0, j);
-          }
-        }
-
-        if (longFlag) {
-          flag = flag.substring(2);
-        }
-
-        if (shortFlag) {
-          flag = getFlagLongVariant(flag.substring(1));
-
-          if (flag == null) {
-            printUsage();
-          }
-        }
-
-        if (value == null) {
-          for (int j = 0; j < FLAGS_TAKE_VALUE.length; j++) {
-            if (FLAGS_TAKE_VALUE[j].equals(flag)) {
-              value = args[i+1];
-              i++;
-              break;
-            }
-          }
-        }
-
-        handleFlag(flag, value);
-      } else {
-        handlePositionalArgument(arg, positionalIndex);
-        positionalIndex += 1;
-      }
+    if (factory != null) {
+      finishMatcher();
+      selectMatcher(factory);
+    } else {
+      printUsage();
     }
   }
 
-  private void handlePositionalArgument(String arg, int index) {
+  private boolean handlePositionalArgument(int index, String arg) {
     if (index == 0) {
       addPattern(arg);
     } else {
       addInput(arg);
     }
-  }
 
-  private void handleFlag(String name, String value) {
-    if (name.equals("pattern")) {
-      addPattern(value);
-    } else if (name.equals("input")) {
-      addInput(value);
-    } else {
-      StringMatcherBuilderFactory factory = matcherBuilderFactories.get(name);
-
-      if (factory != null) {
-        finishMatcher();
-        selectMatcher(factory);
-      } else {
-        printUsage();
-      }
-    }
+    return true;
   }
 
   private void printUsage() {
@@ -155,10 +107,9 @@ public class Main {
     System.err.println("                               [<PATTERN>] [<FILE>...]");
     System.err.println();
     System.err.println("         --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
-    System.err.println(" --knuth-morris-pratt | Use the Knuth-Morris-Pratt algotithm for the subsequent patterns");
+    System.err.println(" --knuth-morris-pratt | Use the Knuth-Morris-Pratt algorithm for the subsequent patterns");
     System.err.println("            <PATTERN> | Substring to be searched from the input streams");
     System.err.println("               <FILE> | Path to a file or - for standard input.");
-    System.exit(1);
   }
 
   private void addPattern(String pattern) {
@@ -251,5 +202,3 @@ public class Main {
     new Main().run(args);
   }
 }
-
-
