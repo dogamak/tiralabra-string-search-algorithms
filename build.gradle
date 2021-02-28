@@ -30,7 +30,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'tiralabra.app.Main'
+    mainClass = 'tiralabra.app.cli.Main'
 }
 
 tasks.named('test') {
@@ -44,6 +44,6 @@ test {
 
 jar {
   manifest {
-    attributes 'Main-Class': 'tiralabra.app.Main'
+    attributes 'Main-Class': 'tiralabra.app.cli.Main'
   }
 }

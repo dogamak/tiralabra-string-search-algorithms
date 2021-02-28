@@ -3,7 +3,7 @@
  * @created : 2021-02-04
 **/
 
-package tiralabra.app;
+package tiralabra.app.benchmark;
 
 /**
  * Benchmark result formatter for outputting an ASCII table

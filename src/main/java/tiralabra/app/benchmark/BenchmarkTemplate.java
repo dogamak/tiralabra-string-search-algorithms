@@ -3,7 +3,7 @@
  * @created : 2021-02-04
 **/
 
-package tiralabra.app;
+package tiralabra.app.benchmark;
 
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcherBuilder;
