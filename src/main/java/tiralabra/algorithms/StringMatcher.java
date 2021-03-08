@@ -54,7 +54,7 @@ public abstract class StringMatcher {
   }
 
   public int pushBytes(byte[] bytes) {
-      return buffer.pushArray(bytes);
+      return pushBytes(bytes, 0, bytes.length);
   }
 
   public int pushBytes(byte[] bytes, int offset, int size) {

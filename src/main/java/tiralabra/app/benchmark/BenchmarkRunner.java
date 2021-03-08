@@ -5,6 +5,7 @@
 
 package tiralabra.app.benchmark;
 
+import tiralabra.algorithms.AhoCorasick.AhoCorasick;
 import tiralabra.algorithms.BoyerMoore.BoyerMoore;
 import tiralabra.algorithms.NaiveSearch.NaiveSearch;
 import tiralabra.algorithms.RabinKarp.BitShiftHash;
@@ -73,12 +74,13 @@ public class BenchmarkRunner {
       new Algorithm("Knuth-Morris-Pratt", KnuthMorrisPratt::getBuilder),
       new Algorithm("Boyer-Moore", BoyerMoore::getBuilder),
       new Algorithm("Naïve Search", NaiveSearch::getBuilder),
+      new Algorithm("Aho-Corasick", AhoCorasick::getBuilder)
     };
   }
-  
-  /**
-   * Initialize the class and call the {@link #run} method.
-   */
+
+    /**
+     * Initialize the class and call the {@link #run} method.
+     */
   public static void main(String[] args) {
     new BenchmarkRunner().run(args);
   }

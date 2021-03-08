@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import tiralabra.algorithms.AhoCorasick.AhoCorasick;
 import tiralabra.algorithms.BoyerMoore.BoyerMoore;
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
@@ -50,6 +51,7 @@ public class Main {
     matcherBuilderFactories.insert("rabin-karp", Main::rabinKarpBuilderFactory);
     matcherBuilderFactories.insert("knuth-morris-pratt", Main::knuthMorrisPrattBuilderFactory);
     matcherBuilderFactories.insert("boyer-moore", () -> BoyerMoore.getBuilder().adapt());
+    matcherBuilderFactories.insert("aho-corasick", AhoCorasick::getBuilder);
   }
 
   private static StringMatcherBuilder rabinKarpBuilderFactory() {
@@ -69,8 +71,9 @@ public class Main {
       parser.addFlagHandler("rabin-karp", this::handleAlgorithmFlag);
       parser.addFlagHandler("knuth-morris-pratt", this::handleAlgorithmFlag);
       parser.addFlagHandler("boyer-moore", this::handleAlgorithmFlag);
+    parser.addFlagHandler("aho-corasick", this::handleAlgorithmFlag);
 
-      parser.addPositionalArgumentHandler(this::handlePositionalArgument);
+    parser.addPositionalArgumentHandler(this::handlePositionalArgument);
 
       try {
         parser.parse(args);
@@ -110,9 +113,10 @@ public class Main {
     System.err.println("                               [--pattern=<PATTERN>...] [--input=<FILE>...]");
     System.err.println("                               [<PATTERN>] [<FILE>...]");
     System.err.println();
-    System.err.println("          --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
     System.err.println("  --knuth-morris-pratt | Use the Knuth-Morris-Pratt algorithm for the subsequent patterns");
+    System.err.println("        --aho-corasick | Use the Aho-Corasick algorithm for the subsequent patterns");
     System.err.println("         --boyer-moore | Use the Boyer-Moore algorithm for the subsequent patterns");
+    System.err.println("          --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
     System.err.println(" -i, --input=<PATTERN> | Substring to be searched from the input streams");
     System.err.println("  -p, --pattern=<FILE> | Path to a file or - for standard input.");
   }

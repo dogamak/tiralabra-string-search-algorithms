@@ -5,6 +5,7 @@
 
 package tiralabra.algorithms;
 
+import tiralabra.algorithms.AhoCorasick.AhoCorasick;
 import tiralabra.algorithms.NaiveSearch.NaiveSearch;
 import tiralabra.algorithms.RabinKarp.RabinKarp;
 import tiralabra.algorithms.KnuthMorrisPratt.KnuthMorrisPratt;
@@ -134,7 +135,8 @@ public class StringMatcherTest {
       RabinKarp.getBuilder(),
       KnuthMorrisPratt.getBuilder(),
       BoyerMoore.getBuilder(),
-      NaiveSearch.getBuilder()
+      NaiveSearch.getBuilder(),
+      AhoCorasick.getBuilder(),
     };
   }
 }
