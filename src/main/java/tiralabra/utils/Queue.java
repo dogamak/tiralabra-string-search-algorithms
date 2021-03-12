@@ -75,6 +75,15 @@ public class Queue<T> implements Iterable<T> {
     }
 
     /**
+     * Get the number of elements in the queue.
+     *
+     * @return Number of elements in the queue.
+     */
+    public int size() {
+        return size;
+    }
+
+    /**
      * Returns whether the queue is empty.
      *
      * @return True if the queue contains no items and false otherwise.
