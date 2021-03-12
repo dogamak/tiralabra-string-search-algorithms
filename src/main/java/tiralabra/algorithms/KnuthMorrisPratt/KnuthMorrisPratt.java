@@ -7,15 +7,25 @@ package tiralabra.algorithms.KnuthMorrisPratt;
 
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcher;
-import tiralabra.algorithms.StringMatcher.Match;
 import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.utils.RingBuffer;
 
-public class KnuthMorrisPratt extends StringMatcher {
-  byte[] pattern;
-  int[] skip_table;
+import java.util.Iterator;
 
-  int largest_skip;
+/**
+ * Implementation of the Knuth-Morris-Pratt string search algorithm.
+ */
+public class KnuthMorrisPratt extends StringMatcher {
+  /**
+   * The pattern that is being searched for.
+   */
+  byte[] pattern;
+
+  /**
+   * Look-up-table for the number of bytes we can skip in the pattern when a match fails
+   * at a given offset in the pattern.
+   */
+  int[] skip_table;
 
   /**
    * Offset of the byte in the pattern against which the next input byte
@@ -24,26 +34,51 @@ public class KnuthMorrisPratt extends StringMatcher {
   int pattern_offset = 0;
 
   /**
-   * Bytes processed since the beginnig of the input stream.
+   * Bytes processed since the beginning of the input stream.
    */
   int input_offset = 0;
-  ArrayList<Match> matches = new ArrayList<>();
 
+  /**
+   * Creates an instance which searches for the given pattern.
+   *
+   * @param pattern - Byte string to search for.
+   */
   KnuthMorrisPratt (byte[] pattern) {
     this.pattern = pattern;
 
     buildSkipTable();
   }
 
+  /** {@inheritDoc} */
   public static StringMatcherBuilder getBuilder() {
     return new KnuthMorrisPrattBuilder().adapt();
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public Iterator<byte[]> getPatterns() {
+    return new Iterator<byte[]>() {
+      private boolean consumed = false;
+
+      @Override
+      public boolean hasNext() {
+        return !consumed;
+      }
+
+      @Override
+      public byte[] next() {
+        return pattern;
+      }
+    };
+  }
+
+  /**
+   * Constructs the {@link #skip_table} from the {@link #pattern}.
+   */
   void buildSkipTable() {
     skip_table = new int[pattern.length + 1];
 
     skip_table[0] = -1;
-    largest_skip = 0;
 
     int next_possible_offset = 0;
     int pattern_index = 1;
@@ -51,13 +86,8 @@ public class KnuthMorrisPratt extends StringMatcher {
     while (pattern_index < pattern.length) {
       skip_table[pattern_index] = next_possible_offset;
 
-      if (pattern[next_possible_offset] != pattern[pattern_index]) {
-        while (next_possible_offset >= 0 && pattern[pattern_index] != pattern[next_possible_offset])
-          next_possible_offset = skip_table[next_possible_offset];
-      }
-
-      if (skip_table[pattern_index] > largest_skip)
-        largest_skip = skip_table[pattern_index];
+      while (next_possible_offset >= 0 && pattern[pattern_index] != pattern[next_possible_offset])
+        next_possible_offset = skip_table[next_possible_offset];
 
       pattern_index++;
       next_possible_offset++;
@@ -66,15 +96,30 @@ public class KnuthMorrisPratt extends StringMatcher {
     skip_table[pattern_index] = next_possible_offset;
   }
 
-  public void process() {
-    RingBuffer buffer = getBuffer();
+  /** {@inheritDoc} */
+  @Override
+  public boolean pushByte(byte b) {
+    processByte(b);
 
-    while (buffer.size() > 0)
-        processByte(buffer.pop());
+    return true;
   }
 
-  public void processByte(byte b) {
-    // Repeat until we need the next byte of input
+  /** {@inheritDoc} */
+  @Override
+  public int pushBytes(byte[] array, int offset, int size) {
+    for (int i = offset; i < offset + size; i++)
+      processByte(array[i]);
+
+    return size;
+  }
+
+  /**
+   * Processes a single byte of input.
+   *
+   * @param b - The next byte in the input stream.
+   */
+  private void processByte(byte b) {
+    // Repeat until we have done everything we can with the current byte.
     while (true) {
       if (pattern[pattern_offset] == b) {
         pattern_offset++;

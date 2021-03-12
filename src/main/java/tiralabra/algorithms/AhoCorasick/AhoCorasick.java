@@ -3,10 +3,10 @@ package tiralabra.algorithms.AhoCorasick;
 import tiralabra.algorithms.StringMatcher;
 import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.utils.ArrayList;
-import tiralabra.utils.HashMap;
 import tiralabra.utils.Queue;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Represents a single node in the trie used by the Aho-Corasick algorithm.
@@ -107,6 +107,11 @@ public class AhoCorasick extends StringMatcher {
         constructTrie();
     }
 
+    @Override
+    public Iterator<byte[]> getPatterns() {
+      return dictionary.iterator();
+    }
+
     /**
      * Returns a {@link StringMatcherBuilder} for constructing Aho-Corasick matchers.
      *
@@ -195,7 +200,7 @@ public class AhoCorasick extends StringMatcher {
 
                 // ...but instead we process it's children here.
 
-                // This way we have the child's parent in scope without any additional book keeping.
+                // This way we can have the child's parent in scope without any additional book keeping.
                 // We can do this because aren't interested in the root node itself, as it cannot have
                 // non-trivial suffixes.
 

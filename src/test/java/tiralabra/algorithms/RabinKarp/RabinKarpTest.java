@@ -39,11 +39,11 @@ public class RabinKarpTest {
     Match match2 = rk.pollMatch();
 
     assertNotNull(match1);
-    assertEquals(match1.getOffset(), 1);
+    assertEquals(1, match1.getOffset());
     assertArrayEquals(match1.getSubstring(), "asxa".getBytes());
 
     assertNotNull(match2);
-    assertEquals(match2.getOffset(), 2);
+    assertEquals(2, match2.getOffset());
     assertArrayEquals(match2.getSubstring(), "sxa".getBytes());
 
     assertNull(rk.pollMatch());

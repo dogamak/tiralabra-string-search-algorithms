@@ -1,5 +1,8 @@
 package tiralabra.algorithms.RabinKarp;
 
+/**
+ * Simple but efficient rolling hash function implemented by using bit shifting.
+ */
 public class BitShiftHash extends RollingHashFunction {
     private int hash = 0;
 
@@ -10,7 +13,10 @@ public class BitShiftHash extends RollingHashFunction {
 
     @Override
     public void pushByte(byte b) {
-        hash = (hash << 1) - (getLastByte() << getWindowSize()) + b;
+        int rotated = Integer.rotateLeft(hash, 1);
+        int old_rotated = Integer.rotateLeft(getLastByte(), getWindowSize());
+        hash = rotated ^ old_rotated ^ b;
+        advanceWindow(b);
     }
 
     @Override

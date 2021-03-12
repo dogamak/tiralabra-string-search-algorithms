@@ -5,46 +5,96 @@
 
 package tiralabra.algorithms.RabinKarp;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import tiralabra.utils.HashMap;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcher;
-import tiralabra.algorithms.StringMatcherBuilder;
 import tiralabra.utils.RingBuffer;
 
+/**
+ * Implementation of the Rabin-Karp string search algorithm.
+ */
 public class RabinKarp extends StringMatcher {
-  private class SuspectedMatchState {
+  /**
+   * Class for keeping state about matches, that are only verified up to the
+   * current cursor position.
+   */
+  private class SuspectedMatch {
+    /**
+     * Location of the start of this match, counting from the start of the input stream.
+     */
     int offset = 0;
+
+    /**
+     * Pattern which is begin confirmed.
+     */
     byte[] substring;
 
-    SuspectedMatchState(byte[] substring) {
+    SuspectedMatch(byte[] substring, int offset) {
       this.substring = substring;
+      this.offset = offset;
     }
   }
 
+  /**
+   * Map from hashes produced by {@link #hash} to a list of patterns that have a prefix
+   * with this hash.
+   */
   private HashMap<Object, ArrayList<byte[]>> substringHashes = new HashMap<>();
-  private RollingHashFunctionFactory hashFactory;
-  private RollingHashFunction hash;
-  private int inputOffset = 0;
-  private int windowSize;
-  private ArrayList<SuspectedMatchState> suspectedMatches;
 
+  /**
+   * Factory for creating new instances of the rolling hash function.
+   */
+  private RollingHashFunctionFactory hashFactory;
+
+  /**
+   * An instance of a rolling hash function.
+   */
+  private RollingHashFunction hash;
+
+  /**
+   * Current offset in the input stream in bytes.
+   */
+  private int inputOffset = 0;
+
+  /**
+   * Size of the window (up to the current point in the input stream) which is being hashed.
+   *
+   * The size of this window is the length of the shortest pattern.
+   */
+  private int windowSize;
+
+  /**
+   * List of matches suspected because a part of the input stream has a same hash
+   * than a prefix of a pattern.
+   */
+  private ArrayList<SuspectedMatch> suspectedMatches;
+
+  /**
+   * List of the patterns that are being searched for.
+   */
+  private byte[][] patterns;
+
+  /**
+   * Creates a new instance of the Rabin-Karp algorithm using a provided hashing function.
+   *
+   * @param substrings - List of byte strings to search for.
+   * @param hashFactory - Factory for creating a hash function.
+   */
   RabinKarp(byte[][] substrings, RollingHashFunctionFactory hashFactory) {
+    this.patterns = substrings;
     this.hashFactory = hashFactory;
 
-    windowSize = substrings[0].length;
-    int bufferCapacity = substrings[0].length;
+    windowSize = Integer.MAX_VALUE;
 
-    for (int i = 1; i < substrings.length; i++) {
-      if (windowSize > substrings[i].length) {
-        windowSize = substrings[i].length;
-      }
-
-      if (bufferCapacity < substrings[i].length) {
-        bufferCapacity = substrings[i].length;
-      }
+    for (byte[] substring : substrings) {
+      windowSize = Math.min(windowSize, substring.length);
     }
+
+    // Calculate a hash for the windowSize-length prefix of each pattern
+    // and store them in the `substringHashes` map.
 
     for (byte[] substring : substrings) {
       RollingHashFunction hash = hashFactory.create(windowSize);
@@ -67,19 +117,34 @@ public class RabinKarp extends StringMatcher {
     suspectedMatches = new ArrayList<>(substrings.length);
   }
 
+  /** {@inheritDoc} */
   public static RabinKarpBuilder getBuilder() {
     return new RabinKarpBuilder();
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public Iterator<byte[]> getPatterns() {
+    return Arrays.stream(patterns).iterator();
+  }
+
+  /**
+   * Cursor position in the internal buffer.
+   */
+  private int cursor = 0;
+
+  /** {@inheritDoc} */
   public void process() {
     RingBuffer buffer = getBuffer();
-
-    int cursor = 0;
 
     while (buffer.size() > 0) {
       inputOffset += 1;
 
       hash.pushByte(buffer.get(cursor));
+
+      // Since we need to be able to verify the hash matches we encounter,
+      // we need to keep `windowSize` number of bytes in the buffer "behind"
+      // the cursor.
 
       if (cursor >= windowSize) {
         buffer.advance(1);
@@ -87,45 +152,63 @@ public class RabinKarp extends StringMatcher {
         cursor++;
       }
 
-      for (int i = 0; i < suspectedMatches.size(); i++) {
-        suspectedMatches.get(i).offset += 1;
-      }
+      checkForPreliminaryMatches();
 
-      ArrayList<byte[]> matches = substringHashes.get(hash.getHash());
+      suspectedMatches.filter(this::handleSuspectedMatches);
+    }
+  }
 
-      if (matches != null && cursor == windowSize) {
-        outer:
-        for (int i = 0; i < matches.size(); i++) {
-          byte[] pattern = matches.get(i);
+  /**
+   * Check if hash of the rolling window matches a known hash
+   * and add an entry to {@link #suspectedMatches} for each
+   * possible match associated with that hash.
+   */
+  private void checkForPreliminaryMatches() {
+    RingBuffer buffer = getBuffer();
 
-          for (int j = 0; j < windowSize; j++) {
-            if (buffer.get(j) != pattern[j])
-              continue outer;
+    ArrayList<byte[]> matches = substringHashes.get(hash.getHash());
+
+    // Hash of the rolling window matches a known hash.
+    // If we do not have yet `windowSize` bytes in the buffer,
+    // we know that this match must be a false positive.
+
+    if (matches != null && cursor == windowSize) {
+      for (byte[] pattern : matches) {
+        int i = 0;
+
+        while (i < windowSize && buffer.get(i) == pattern[i]) i++;
+
+        if (i == windowSize) {
+          if (pattern.length > windowSize) {
+            suspectedMatches.add(new SuspectedMatch(pattern, inputOffset - windowSize));
+          } else {
+            addMatch(inputOffset - windowSize, pattern);
           }
-
-          suspectedMatches.add(new SuspectedMatchState(pattern));
-        }
-      }
-
-      outer:
-      for (int i = 0; i < suspectedMatches.size(); i++) {
-        SuspectedMatchState state = suspectedMatches.get(i);
-
-        if (state.offset == state.substring.length - windowSize) {
-          suspectedMatches.remove(i);
-          i--;
-
-          for (int j = 0; j < state.offset; j++) {
-            byte bufferByte = buffer.get(state.substring.length - windowSize + j + 1);
-
-            if (bufferByte != state.substring[windowSize + j]) {
-              continue outer;
-            }
-          }
-
-          addMatch(inputOffset - state.substring.length, state.substring);
         }
       }
     }
+  }
+
+  /**
+   * Checks a suspected match against the byte at the cursor.
+   *
+   * @param match - A suspected match.
+   * @return True if the match need to be checked again, False if the match has been confirmed
+   *   to be correct or a false positive.
+   */
+  private boolean handleSuspectedMatches(SuspectedMatch match) {
+    RingBuffer buffer = getBuffer();
+
+    byte buffer_byte = buffer.get(cursor);
+    byte pattern_byte = match.substring[inputOffset - match.offset];
+
+    boolean byte_matches = buffer_byte == pattern_byte;
+    boolean whole_pattern_checked = inputOffset >= match.offset + match.substring.length - 1;
+
+    if (byte_matches && whole_pattern_checked) {
+      addMatch(inputOffset - match.substring.length + 1, match.substring);
+    }
+
+    return byte_matches && !whole_pattern_checked;
   }
 }

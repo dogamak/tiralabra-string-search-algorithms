@@ -11,6 +11,8 @@ import tiralabra.algorithms.SingleStringMatcherBuilder;
 import tiralabra.utils.ArrayList;
 import tiralabra.utils.RingBuffer;
 
+import java.util.Iterator;
+
 public class BoyerMoore extends StringMatcher {
   private ArrayList[] bad_character_table = new ArrayList[256];
   private int[] good_suffix_table;
@@ -33,6 +35,23 @@ public class BoyerMoore extends StringMatcher {
         return new BoyerMoore(pattern);
       }
     }.adapt();
+  }
+
+  @Override
+  public Iterator<byte[]> getPatterns() {
+    return new Iterator<byte[]>() {
+      private boolean consumed = false;
+
+      @Override
+      public boolean hasNext() {
+        return !consumed;
+      }
+
+      @Override
+      public byte[] next() {
+        return pattern;
+      }
+    };
   }
 
   /**
@@ -208,8 +227,19 @@ public class BoyerMoore extends StringMatcher {
     }
   }
 
+  /**
+   * The number of bytes we keep around in the buffer after processing them.
+   */
   private int backbuffer_size;
+
+  /**
+   * Cursor in the input stream, indexed from the start of input and not from the start of the buffer.
+   */
   private int cursor = 0;
+
+  /**
+   * Start of the buffer expressed in bytes since the start of input.
+   */
   private int buffer_start = 0;
 
   public void process() {

@@ -7,6 +7,9 @@ package tiralabra.algorithms;
 
 import tiralabra.utils.ArrayList;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * Adapter which allows multi-pattern matching string matchers to be created
  * for algorithms which only provide a {@link SingleStringMatcherBuilder} implementation.
@@ -42,6 +45,44 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
       for (int i = 0; i < patterns.size(); i++) {
         matchers.add(builder.buildMatcher(patterns.get(i)));
       }
+    }
+
+    @Override
+    public Iterator<byte[]> getPatterns() {
+      return new Iterator<byte[]>() {
+        private int matcher_index = -1;
+        private Iterator<byte[]> matcher_iterator = null;
+
+        @Override
+        public boolean hasNext() {
+          if (matcher_iterator == null || !matcher_iterator.hasNext()) {
+            matcher_index++;
+
+            if (matcher_index > matchers.size()) {
+              return false;
+            }
+
+            matcher_iterator = matchers.get(matcher_index).getPatterns();
+          }
+
+          return matcher_iterator.hasNext();
+        }
+
+        @Override
+        public byte[] next() {
+          if (matcher_iterator == null || !matcher_iterator.hasNext()) {
+            matcher_index++;
+
+            if (matcher_index > matchers.size()) {
+              throw new NoSuchElementException();
+            }
+
+            matcher_iterator = matchers.get(matcher_index).getPatterns();
+          }
+
+          return matcher_iterator.next();
+        }
+      };
     }
 
     /**

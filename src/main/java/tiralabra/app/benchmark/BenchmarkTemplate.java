@@ -57,13 +57,14 @@ public class BenchmarkTemplate {
   /**
    * Read an parse a benchmark template from a file.
    *
-   * <h3>Contents of a benchmark template file</h3>
+   * <h4>Contents of a benchmark template file</h4>
    *
    * Each valid benchmark template file contains the following items:
    *
    * <ul>
    *   <li>The first line contains the name of the template.
-   *   <li>The second line contains two numbers: the first is the number of patterns in this template and the second the number of input streams.
+   *   <li>The second line contains two numbers: the first is the number of patterns
+   *       in this template and the second the number of input streams.
    *   <li>From the third line onwards, there is a single pattern per line. 
    *   <li>After the patterns, there are the input streams, one stream per line.
    * </ul>

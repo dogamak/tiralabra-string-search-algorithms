@@ -5,13 +5,15 @@
 
 package tiralabra.utils;
 
+import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.Arrays;
 
 /**
  * Simple resizeable array implementation.
  */
-public class ArrayList<T> {
+public class ArrayList<T> implements Iterable<T> {
   /**
    * Internal array allocated for the entries.
    *
@@ -134,5 +136,57 @@ public class ArrayList<T> {
 
   public Stream<T> getStream() {
     return Arrays.stream(array).map(entry -> (T) entry).limit(size);
+  }
+
+  @Override
+  public Iterator<T> iterator() {
+    return new Iterator() {
+      private int cursor = 0;
+
+      @Override
+      public boolean hasNext() {
+        return cursor < size;
+      }
+
+      @Override
+      public Object next() {
+        return array[cursor++];
+      }
+    };
+  }
+
+  /**
+   * Removes element from the specified index in O(1) time by swapping it with the last item
+   * in the array and truncating the array.
+   *
+   * @param index - Index of the item to remove.
+   * @return The removed item.
+   */
+  public T swapRemove(int index) {
+    T value = (T) array[index];
+
+    array[index] = array[size - 1];
+    array[size - 1] = null;
+    size--;
+
+    return value;
+  }
+
+  /**
+   * Filters the contents of the array using a predicate.
+   * NOTE: Does not maintain the order of the array.
+   *
+   * @param predicate - Predicate to decide which elements are kept.
+   */
+  public void filter(Function<T, Boolean> predicate) {
+    int i = 0;
+
+    while (i < size) {
+      if (!predicate.apply(get(0))) {
+        swapRemove(i);
+      } else {
+        i++;
+      }
+    }
   }
 }
