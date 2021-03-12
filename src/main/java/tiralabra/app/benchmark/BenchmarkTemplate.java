@@ -35,16 +35,22 @@ public class BenchmarkTemplate {
   private byte[][] streams;
 
   /**
+   * Number times this benchmark should be run.
+   */
+  private int iteration_count;
+
+  /**
    * Create a benchmark template from the values parsed from a file.
    *
    * @param name - Name of this template
    * @param patterns - List of byte patterns to search from the streams
    * @param streams - List of input streams from which to search
    */
-  BenchmarkTemplate(String name, byte[][] patterns, byte[][] streams) {
+  BenchmarkTemplate(String name, int iteration_count, byte[][] patterns, byte[][] streams) {
     this.name = name;
     this.patterns = patterns;
     this.streams = streams;
+    this.iteration_count = iteration_count;
   }
 
   /**
@@ -83,6 +89,12 @@ public class BenchmarkTemplate {
     int pattern_count = Integer.valueOf(counts[0]);
     int stream_count = Integer.valueOf(counts[1]);
 
+    int iter_count = 1000;
+
+    if (counts.length > 2) {
+      iter_count = Integer.valueOf(counts[2]);
+    }
+
     byte[][] patterns = new byte[pattern_count][];
     byte[][] streams = new byte[stream_count][];
 
@@ -94,7 +106,7 @@ public class BenchmarkTemplate {
       streams[i] = br.readLine().getBytes();
     }
 
-    return new BenchmarkTemplate(name, patterns, streams);
+    return new BenchmarkTemplate(name, iter_count, patterns, streams);
   }
 
   /**
@@ -114,5 +126,28 @@ public class BenchmarkTemplate {
     }
 
     return new Benchmark(matchers, streams);
+  }
+
+  /**
+   * Get the number of times this benchmark should be run by default.
+   *
+   * @return Number of iterations.
+   */
+  public int getIterationCount() {
+    return iteration_count;
+  }
+
+  /**
+   * Get the cumulative size of the input streams in bytes.
+   *
+   * @return Number of input bytes in total for this benchmark.
+   */
+  public int getInputSize() {
+    int size = 0;
+
+    for (byte[] stream : streams)
+      size += stream.length;
+
+    return size;
   }
 }

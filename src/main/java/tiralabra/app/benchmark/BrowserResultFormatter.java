@@ -71,15 +71,17 @@ public class BrowserResultFormatter extends ResultFormatter {
     }
 
     writer.write(String.format(
-            "<td data-init=\"%s\" data-init-deviation=\"%s\" data-exec=\"%s\" data-exec-deviation=\"%s\"><div class=\"cell-wrapper\">",
+            "<td data-init=\"%s\" data-init-deviation=\"%s\" data-exec=\"%s\" data-exec-deviation=\"%s\" data-speed=\"%s\"><div class=\"cell-wrapper\">",
             result.getAverageInitTime(),
             result.getInitTimeVariance(),
             result.getAverageExecTime(),
-            result.getExecTimeVariance()
+            result.getExecTimeVariance(),
+            result.getBytesPerSecond()
     ));
 
     writeMetric("Initialization", "ms/iter", result.getAverageInitTime(), result.getInitTimeVariance());
     writeMetric("Execution", "ms/iter", result.getAverageExecTime(), result.getExecTimeVariance());
+    writeMetric("Speed", "MB/s", result.getBytesPerSecond() / 1000000.);
 
     writer.write("</div></td>");
 
@@ -95,6 +97,17 @@ public class BrowserResultFormatter extends ResultFormatter {
       "  <span class=\"metric-variance\">(± %.2f)</span>" +
       "</div>",
       name, value, unit, variance
+    ));
+  }
+
+  private void writeMetric(String name, String unit, double value) throws IOException {
+    writer.write(String.format(
+      "<div class=\"metric-group\">" +
+        "  <span class=\"metric-label\">%s</span>" +
+        "  <span class=\"metric-value\">%.4f</span>" +
+        "  <span class=\"metric-unit\">%s</span>" +
+        "</div>",
+      name, value, unit
     ));
   }
 

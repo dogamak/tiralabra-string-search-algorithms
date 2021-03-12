@@ -2,11 +2,16 @@ body {
   font-family: sans-serif;
 }
 
-ul {
+.options {
   position: absolute;
   top: 0;
   right: 0;
   margin: 3em;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
@@ -69,7 +74,7 @@ th, td {
     background-color: green;
 }
 
-.exec-time {
+.exec-time, .speed {
     background-color: #0fb70f;
 }
 

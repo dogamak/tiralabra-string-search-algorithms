@@ -1,29 +1,60 @@
+let comparisonRef = { value: 'time' };
+
+const setComparison = (value) => {
+    comparisonRef.value = value;
+    updateMeters();
+};
+
 const updateMeters = () => {
+  let meterSegments = {
+    time: [
+        {
+            className: 'exec-time',
+            get: (td) => parseFloat($(td).attr('data-exec')),
+        },
+        {
+            className: 'init-time',
+            get: (td) => parseFloat($(td).attr('data-init')),
+        }
+    ],
+    speed: [{
+        className: 'speed',
+        get: (td) => parseFloat($(td).attr('data-speed')),
+    }],
+  }[comparisonRef.value];
+
+  let lowerBetter = true;
+
+  if (comparisonRef.value == 'speed') {
+    lowerBetter = false;
+  }
+
   $('tr:not(:first-child)')
     .each((i, tr) => {
       let highestCumulative = 0;
       let lowestCumulative = Number.MAX_SAFE_INTEGER;
 
       $(tr).find('td:visible').each((i, td) => {
-        const init = parseFloat($(td).attr("data-init"));
-        const exec = parseFloat($(td).attr("data-exec"));
+        let cumulative = 0;
 
-        if (init + exec > highestCumulative) {
-          highestCumulative = init + exec;
+        for (const { get } of meterSegments) {
+            cumulative += get(td);
         }
 
-        if (init + exec !== 0 && init + exec < lowestCumulative) {
-          lowestCumulative = init + exec;
+        if (cumulative > highestCumulative) {
+          highestCumulative = cumulative;
+        }
+
+        if (cumulative !== 0 && cumulative < lowestCumulative) {
+          lowestCumulative = cumulative;
         }
       });
 
       $(tr).find('td').each((i, td) => {
-        const init = parseFloat($(td).attr("data-init"));
-        const exec = parseFloat($(td).attr("data-exec"));
-
         let meter = $(td).find('.meter');
-        let init_time_el = $(td).find('.meter .init-time');
-        let exec_time_el = $(td).find('.meter .exec-time');
+        meter.html('');
+        meter = $(td).find('meter');
+
         let empty_el = $(td).find('.meter .meter-empty');
 
         if (!meter.length) {
@@ -31,34 +62,46 @@ const updateMeters = () => {
             .addClass('meter')
             .appendTo($(td).find('.cell-wrapper'));
 
-          init_time_el = $('<div>')
-            .addClass('init-time')
-            .appendTo(meter);
-
-          exec_time_el = $('<div>')
-            .addClass('exec-time')
-            .appendTo(meter);
+          for (const { className } of meterSegments) {
+              $('<div>')
+                  .addClass(className)
+                  .appendTo(meter);
+          }
 
           empty_el = $('<div>')
             .addClass('meter-empty')
             .appendTo(meter);
         }
 
+        let cumulative = 0;
+
+        for (const { get, className } of meterSegments) {
+            let value = get(td);
+            cumulative += value;
+            $(td).find('.' + className).css('flex-grow', value / highestCumulative * 1000);
+        }
+
         $(td).off().hover(
           () => empty_el.css('flex-grow', 0),
-          () => empty_el.css('flex-grow', 1000 - (init + exec) / highestCumulative * 1000),
+          () => empty_el.css('flex-grow', 1000 - cumulative / highestCumulative * 1000),
         );
 
-        init_time_el.css('flex-grow', init / highestCumulative * 1000);
-        exec_time_el.css('flex-grow', exec / highestCumulative * 1000);
-        empty_el.css('flex-grow', 1000 - (init + exec) / highestCumulative * 1000);
+        empty_el.css('flex-grow', 1000 - cumulative / highestCumulative * 1000);
 
-        if (exec + init === 0) {
+        let bestValue = lowestCumulative;
+        let worstValue = highestCumulative;
+
+        if (!lowerBetter) {
+            bestValue = highestCumulative;
+            worstValue = lowestCumulative;
+        }
+
+        if (cumulative === 0) {
           $(td).css('opacity', 0.3);
-        } else if (exec + init == highestCumulative) {
-          $(td).css('background-color', '#f001');
-        } else if (exec + init == lowestCumulative) {
-          $(td).css('background-color', '#0f01');
+        } else if (cumulative == worstValue) {
+          $(td).css('background-color', '#f002');
+        } else if (cumulative == bestValue) {
+          $(td).css('background-color', '#0f02');
         } else {
           $(td).css('background-color', 'transparent');
         }
@@ -68,7 +111,12 @@ const updateMeters = () => {
 
 updateMeters();
 
-const algoList = $('<ul>').appendTo(document.body);
+const rightDiv = $('<div>')
+    .addClass('options')
+    .append($('<h4>Algorithms</h4>'))
+    .appendTo(document.body);
+
+const algoList = $('<ul>').appendTo(rightDiv);
 
 $('tr:first-child th:not(:first-child)').each((i, th) => {
   const algorithm = $(th).text();
@@ -91,3 +139,10 @@ $('tr:first-child th:not(:first-child)').each((i, th) => {
     .text(algorithm)
     .appendTo(li);
 });
+
+$('<h4>Compare</h4>').appendTo(rightDiv);
+
+$('<ul>')
+    .append($('<li>').append($('<input>').attr('checked', true).attr('type', 'radio').attr('name', 'cmp').click(() => setComparison('time'))).append($('<span>').text('Iteration time')))
+    .append($('<li>').append($('<input>').attr('checked', false).attr('type', 'radio').attr('name', 'cmp').click(() => setComparison('speed'))).append($('<span>').text('Speed')))
+    .appendTo(rightDiv);

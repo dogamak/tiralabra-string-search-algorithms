@@ -40,6 +40,11 @@ public class BenchmarkResult {
   private double exec_variance;
 
   /**
+   * Number of bytes searched per second on average.
+   */
+  private double bytes_per_second;
+
+  /**
    * Create a new instance containing the results of a single benchmark run.
    *
    * @param algo - Name of the algorithm.
@@ -47,13 +52,14 @@ public class BenchmarkResult {
    * @param init_average - Average initialization time.
    * @param exec_average - Average execution time.
    */
-  public BenchmarkResult(String algo, String name, double init_average, double init_variance, double exec_average, double exec_variance) {
+  public BenchmarkResult(String algo, String name, double init_average, double init_variance, double exec_average, double exec_variance, double bytes_per_second) {
     this.algorithm = algo;
     this.name = name;
     this.init_average = init_average;
     this.init_variance = init_variance;
     this.exec_average = exec_average;
     this.exec_variance = exec_variance;
+    this.bytes_per_second = bytes_per_second;
   }
 
   /**
@@ -96,5 +102,12 @@ public class BenchmarkResult {
    */
   public double getInitTimeVariance() {
       return init_variance;
+  }
+
+  /**
+   * Get bytes searched per second.
+   */
+  public double getBytesPerSecond() {
+    return bytes_per_second;
   }
 }

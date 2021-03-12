@@ -58,6 +58,30 @@ public class StringMatcherTest {
 
   @ParameterizedTest
   @MethodSource("getBuilders")
+  void testMultiplePatterns(StringMatcherBuilder builder) {
+    StringMatcher matcher = builder
+      .addPattern("short")
+      .addPattern("a bit longer")
+      .buildMatcher();
+
+    matcher.pushString("the first pattern is short and the second a bit longer!");
+    matcher.finish();
+
+    Match match = matcher.pollMatch();
+    assertNotNull(match);
+    assertArrayEquals("short".getBytes(), match.getSubstring());
+    assertEquals(21, match.getOffset());
+
+    Match match2 = matcher.pollMatch();
+    assertNotNull(match2);
+    assertArrayEquals("a bit longer".getBytes(), match2.getSubstring());
+    assertEquals(42, match2.getOffset());
+
+    assertNull(matcher.pollMatch());
+  }
+
+  @ParameterizedTest
+  @MethodSource("getBuilders")
   void testMatchAtOffsetZero(StringMatcherBuilder builder) {
     StringMatcher matcher = builder.addPattern("pattern").buildMatcher();
 

@@ -23,6 +23,8 @@ public class Benchmark {
    */
   private byte[][] streams;
 
+  private int input_multiplier;
+
   /**
    * Create an {@link Benchmark} instance.
    *
@@ -40,7 +42,7 @@ public class Benchmark {
    */
   public void execute() {
     for (int i = 0; i < matchers.length; i++) {
-      for (int j = 0; j < 10; j++) {
+      for (int j = 0; j < input_multiplier; j++) {
         int consumed = 0;
 
         while (consumed < streams[i].length) {
@@ -53,5 +55,9 @@ public class Benchmark {
 
       matchers[i].finish();
     }
+  }
+
+  public void setInputMultiplier(int input_multiplier) {
+    this.input_multiplier = input_multiplier;
   }
 }

@@ -10,6 +10,7 @@ import tiralabra.algorithms.BoyerMoore.BoyerMoore;
 import tiralabra.algorithms.NaiveSearch.NaiveSearch;
 import tiralabra.algorithms.RabinKarp.BitShiftHash;
 import tiralabra.algorithms.RabinKarp.SimpleModuloHash;
+import tiralabra.app.cli.ArgumentParser;
 import tiralabra.utils.ArrayList;
 import tiralabra.algorithms.StringMatcherBuilderFactory;
 import tiralabra.algorithms.RabinKarp.RabinKarp;
@@ -57,10 +58,18 @@ public class BenchmarkRunner {
 
   /**
    * The number of iterations for each benchmark.
-   *
-   * TODO: Allow for benchmark templates to specify custom iteration counts.
    */
-  private static int CYCLE_COUNT = 1000;
+  private int cycle_count = 1000;
+
+  /**
+   * Input multiplier.
+   */
+  private int input_multiplier = 1;
+
+  /**
+   * Iteration multiplier.
+   */
+  private int iteration_multiplier = 1;
 
   /**
    * A formatter for outputting the benchmark results.
@@ -78,19 +87,57 @@ public class BenchmarkRunner {
     };
   }
 
-    /**
-     * Initialize the class and call the {@link #run} method.
-     */
+  /**
+   * Initialize the class and call the {@link #run} method.
+   */
   public static void main(String[] args) {
     new BenchmarkRunner().run(args);
+  }
+
+  private ArrayList<String> parseArguments(String[] args) {
+    ArrayList<String> benchmarkPaths = new ArrayList<>();
+
+    ArgumentParser parser = new ArgumentParser();
+
+    parser.addPositionalArgumentHandler((index, arg) -> {
+      benchmarkPaths.add(arg);
+      return true;
+    });
+
+    parser.addFlagHandlerValue("i", "iterations", (flag, value) -> {
+      try {
+        iteration_multiplier = Integer.valueOf(value);
+      } catch (NumberFormatException e) {
+        System.out.format("Not an integer: '%s'\n", value);
+      }
+    });
+
+    parser.addFlagHandlerValue("x", "input-multiplier", (flag, value) -> {
+      try {
+        input_multiplier = Integer.valueOf(value);
+      } catch (NumberFormatException e) {
+        System.out.format("Not an integer: '%s'\n", value);
+      }
+    });
+
+    try {
+      parser.parse(args);
+    } catch (Exception e) {
+      System.err.println("Error while parsing arguments: " + e);
+      System.exit(1);
+    }
+
+    return benchmarkPaths;
   }
 
   /**
    * Create benchmarks from the specified benchmark template files and execute them
    * for each of the supported search-algorithms.
    */
-  private void run(String[] benchmarkPaths) {
-    ArrayList<BenchmarkTemplate> templates = new ArrayList<>(benchmarkPaths.length);
+  private void run(String[] arguments) {
+    ArrayList<String> benchmarkPaths = parseArguments(arguments);
+
+    ArrayList<BenchmarkTemplate> templates = new ArrayList<>(benchmarkPaths.size());
     ArrayList<File> benchmarkFiles = new ArrayList<>();
 
     for (String path : benchmarkPaths) {
@@ -154,16 +201,20 @@ public class BenchmarkRunner {
 
     ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
-    double[] init_times = new double[CYCLE_COUNT];
-    double[] exec_times = new double[CYCLE_COUNT];
+    int cycle_count = benchmark.getIterationCount() * iteration_multiplier;
 
-    int warmup_laps = CYCLE_COUNT / 10;
+    double[] init_times = new double[cycle_count];
+    double[] exec_times = new double[cycle_count];
+
+    int warmup_laps = cycle_count / 10;
 
     try {
-      for (int i = 0; i < CYCLE_COUNT + warmup_laps; i++) {
+      for (int i = 0; i < cycle_count + warmup_laps; i++) {
         long init_start = threadMXBean.getCurrentThreadCpuTime();
         Benchmark initialized = benchmark.initialize(algorithm.factory);
         long init_end = threadMXBean.getCurrentThreadCpuTime();
+
+        initialized.setInputMultiplier(input_multiplier);
 
         long exec_start = threadMXBean.getCurrentThreadCpuTime();
         initialized.execute();
@@ -184,24 +235,26 @@ public class BenchmarkRunner {
       System.out.println("FINISHED");
     }
 
-    double init_mean = init_time / (double) CYCLE_COUNT;
-    double exec_mean = exec_time / (double) CYCLE_COUNT;
+    double init_mean = init_time / (double) cycle_count;
+    double exec_mean = exec_time / (double) cycle_count;
 
     double init_var = 0;
     double exec_var = 0;
 
-    for (int i = 0; i < CYCLE_COUNT; i++) {
+    for (int i = 0; i < cycle_count; i++) {
       init_var += Math.pow((init_times[i] - init_mean) / 1000000., 2);
       exec_var += Math.pow((exec_times[i] - exec_mean) / 1000000., 2);
     }
 
-    init_var /= CYCLE_COUNT - 1.;
-    exec_var /= CYCLE_COUNT - 1.;
+    init_var /= cycle_count - 1.;
+    exec_var /= cycle_count - 1.;
 
-    double init_per_cycle = (double) init_time / (double) CYCLE_COUNT / 1000000.;
-    double exec_per_cycle = (double) exec_time / (double) CYCLE_COUNT / 1000000.;
+    double init_per_cycle = (double) init_time / (double) cycle_count / 1000000.;
+    double exec_per_cycle = (double) exec_time / (double) cycle_count / 1000000.;
 
-    BenchmarkResult result = new BenchmarkResult(algorithm.name, benchmark.getName(), init_per_cycle, Math.sqrt(init_var), exec_per_cycle, Math.sqrt(exec_var));
+    double bytes_per_second = ((double) benchmark.getInputSize()) * ((double) cycle_count) / ((double) exec_time) * 1000000000.;
+
+    BenchmarkResult result = new BenchmarkResult(algorithm.name, benchmark.getName(), init_per_cycle, Math.sqrt(init_var), exec_per_cycle, Math.sqrt(exec_var), bytes_per_second);
 
     formatter.format(result);
   }
