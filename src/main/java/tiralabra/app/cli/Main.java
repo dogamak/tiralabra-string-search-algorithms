@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 import tiralabra.algorithms.AhoCorasick.AhoCorasick;
 import tiralabra.algorithms.BoyerMoore.BoyerMoore;
 import tiralabra.algorithms.KnuthMorrisPratt.KnuthMorrisPratt;
+import tiralabra.algorithms.NaiveSearch.NaiveSearch;
+import tiralabra.algorithms.RabinKarp.BitShiftHash;
 import tiralabra.algorithms.RabinKarp.RabinKarp;
 import tiralabra.algorithms.StringMatcherBuilderFactory;
 import tiralabra.utils.HashMap;
@@ -363,9 +365,11 @@ public class Main {
 
   Main () {
     matcherBuilderFactories.insert("rabin-karp", RabinKarp::getBuilder);
+    matcherBuilderFactories.insert("rabin-karp-bs", () -> RabinKarp.getBuilder().setHashFunction(BitShiftHash::new));
     matcherBuilderFactories.insert("knuth-morris-pratt", KnuthMorrisPratt::getBuilder);
     matcherBuilderFactories.insert("boyer-moore", () -> BoyerMoore.getBuilder().adapt());
     matcherBuilderFactories.insert("aho-corasick", AhoCorasick::getBuilder);
+    matcherBuilderFactories.insert("naive", NaiveSearch::getBuilder);
   }
 
   /**
@@ -381,9 +385,11 @@ public class Main {
     parser.addFlagHandlerValue("p", "pattern", (flag, value) -> addPattern(value));
 
     parser.addFlagHandler("rabin-karp", this::handleAlgorithmFlag);
+    parser.addFlagHandler("rabin-karp-bs", this::handleAlgorithmFlag);
     parser.addFlagHandler("knuth-morris-pratt", this::handleAlgorithmFlag);
     parser.addFlagHandler("boyer-moore", this::handleAlgorithmFlag);
     parser.addFlagHandler("aho-corasick", this::handleAlgorithmFlag);
+    parser.addFlagHandler("naive", this::handleAlgorithmFlag);
 
     parser.addPositionalArgumentHandler(this::handlePositionalArgument);
 
@@ -439,15 +445,19 @@ public class Main {
    * Prints the usage instructions for this utility.
    */
   private void printUsage() {
-    System.err.println("Usage: java -jar tiralabra.jar [--rabin-karp] [--knuth-morris-pratt]");
-    System.err.println("                               [--boyer-moore]");
+    System.err.println("Usage: java -jar tiralabra.jar [--rabin-karp] [--rabin-karp-bs]");
+    System.err.println("                               [--knuth-morris-pratt] [--boyer-moore]");
+    System.err.println("                               [--aho-corasick] [--naive]");
     System.err.println("                               [--pattern=<PATTERN>...] [--input=<FILE>...]");
     System.err.println("                               [<PATTERN>] [<FILE>...]");
     System.err.println();
     System.err.println("  --knuth-morris-pratt | Use the Knuth-Morris-Pratt algorithm for the subsequent patterns");
+    System.err.println("       --rabin-karp-bs | Use the Rabin-Karp algorithm (using bit shift hashing)");
+    System.err.println("                       | for the subsequent patterns");
     System.err.println("        --aho-corasick | Use the Aho-Corasick algorithm for the subsequent patterns");
     System.err.println("         --boyer-moore | Use the Boyer-Moore algorithm for the subsequent patterns");
     System.err.println("          --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns");
+    System.err.println("               --naive | Use the naive baseline algorithm for the subsequent patterns");
     System.err.println(" -i, --input=<PATTERN> | Substring to be searched from the input streams");
     System.err.println("  -p, --pattern=<FILE> | Path to a file or - for standard input.");
   }
