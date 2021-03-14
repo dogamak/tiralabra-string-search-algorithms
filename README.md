@@ -3,6 +3,7 @@
 ## Documentation and coursework
 
  - [Project Definition](docs/project-definition.md)
+ - [Testing Document](docs/testing.md)
  - [Weekly Report 01](docs/weekly-report-01.md)
  - [Weekly Report 02](docs/weekly-report-02.md)
  - [Weekly Report 04](docs/weekly-report-04.md)
