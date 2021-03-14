@@ -1,67 +1,16 @@
 # Performance Comparison of String Search Algorithms
 
-## Documentation and coursework
+This repository contains the project and coursework for the University of Helsinki course TKT20010 (Algorithms and Data Structures Project).
+The goal of this project was to implement 4 different string searching algorithms and compare their performance.
+Scope of this project is defined in more detail in the [project definition document](docs/project-definition.md).
+Results of the performance comparison can be found [here](https://karhusaari.me/tiralabra.html).
+
+## Documentation and Coursework
 
  - [Project Definition](docs/project-definition.md)
  - [Testing Document](docs/testing.md)
+ - [User Guide](docs/usage.md)
+ - [Benchmark Results](https://karhusaari.me/tiralabra.html)
  - [Weekly Report 01](docs/weekly-report-01.md)
  - [Weekly Report 02](docs/weekly-report-02.md)
  - [Weekly Report 04](docs/weekly-report-04.md)
-
-## Usage of the Command-Line Utility
-
-After building the project using `gradle build` the JAR file should be located under `build/libs/tiralabra.jar`.
-When executed without any arguments, the utility prints the following usage explanation:
-
-```
-Usage: java -jar tiralabra.jar [--rabin-karp] [--pattern=<PATTERN>...]
-                               [--input=<FILE>...] [<PATTERN>] [<FILE>...]
-
-         --rabin-karp | Use the Rabin-Karp algorithm for the subsequent patterns (Default)
- --knuth-morris-pratt | Use the Knuth-Morris-Pratt algotithm for the subsequent patterns
-            <PATTERN> | Substring to be searched from the input streams
-               <FILE> | Path to a file or - for standard input.
-```
-
-The functionality is very limited as of now, but more functionality is on the way.
-The utility has a `find`-like command-line interface, where the order of the arguments matters
-and they are evaluated from left to right. Specifying a search algorithm causes any subsequently
-defined patterns to be evaluated using the algorithm. This means that a single invocation of the
-utility can be used to execute different searches using different algorithms. Moreover, specifying
-the same algorithm multiple times causes multiple instances of that same algorithm to be created.
-The way how you divide your search patterns to these instances may affect the performance.
-
-Below is an example invocation and it's output:
-
-```
-$ java -jar build/libs/tiralabra.jar -p Rabin Karp src/main/java/tiralabra/app/Main.java - < docs/project-definition.md
-Match at offset 191 on input stdin: Rabin
-Match at offset 197 on input stdin: Karp
-Match at offset 464 on input src/main/java/tiralabra/app/Main.java: Rabin
-Match at offset 469 on input src/main/java/tiralabra/app/Main.java: Karp
-Match at offset 474 on input src/main/java/tiralabra/app/Main.java: Rabin
-Match at offset 479 on input src/main/java/tiralabra/app/Main.java: Karp
-Match at offset 650 on input stdin: Rabin
-Match at offset 656 on input stdin: Karp
-Match at offset 1071 on input src/main/java/tiralabra/app/Main.java: Rabin
-Match at offset 1076 on input src/main/java/tiralabra/app/Main.java: Karp
-Match at offset 1304 on input src/main/java/tiralabra/app/Main.java: Karp
-Match at offset 1373 on input src/main/java/tiralabra/app/Main.java: Karp
-Match at offset 1406 on input stdin: Rabin
-Match at offset 1412 on input stdin: Karp
-Match at offset 1411 on input src/main/java/tiralabra/app/Main.java: Rabin
-Match at offset 1416 on input src/main/java/tiralabra/app/Main.java: Karp
-```
-
-## Executing the benchmarks
-
-All benchmarks defined under the `benchmarks/` directory can be executed using the
-following command after building the project:
-
-```
-java -cp build/libs/tiralabra.jar tiralabra.app.benchmark.BenchmarkRunner benchmarks/*
-```
-This command generates a file named `results.html` in the current working directory.
-Below is a screenshot of a file generated in this way: (A not-neccessarily-up-to-date version of this file can be viewed [here](https://karhusaari.me/tiralabra.html).)
-
-![](./benchmarks.png)
