@@ -58,7 +58,7 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
           if (matcher_iterator == null || !matcher_iterator.hasNext()) {
             matcher_index++;
 
-            if (matcher_index > matchers.size()) {
+            if (matcher_index >= matchers.size()) {
               return false;
             }
 
@@ -73,7 +73,7 @@ public class SingleStringMatcherAdapter implements StringMatcherBuilder {
           if (matcher_iterator == null || !matcher_iterator.hasNext()) {
             matcher_index++;
 
-            if (matcher_index > matchers.size()) {
+            if (matcher_index >= matchers.size()) {
               throw new NoSuchElementException();
             }
 

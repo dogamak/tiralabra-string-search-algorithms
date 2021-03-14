@@ -49,6 +49,7 @@ public class BoyerMoore extends StringMatcher {
 
       @Override
       public byte[] next() {
+        consumed = true;
         return pattern;
       }
     };
